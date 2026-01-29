@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Project Veronica</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --error-color: #ff4444;
+            --success-color: #00C851;
+            --warning-color: #ffbb33;
+            --background-blur: 10px;
+            --container-opacity: 0.9;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            font-family: 'Arial', sans-serif;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-image 0.5s ease;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            backdrop-filter: blur(var(--background-blur)) brightness(0.7);
+            z-index: -1;
+            transition: backdrop-filter 0.3s ease;
+        }
+
+        .login-container {
+            background: rgba(45, 45, 45, var(--container-opacity));
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+            overflow: visible;
+            animation: containerFadeIn 0.5s ease;
+            margin: 60px auto;
+        }
+
+        @keyframes containerFadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .theme-switcher {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .theme-button {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid white;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .theme-button:hover {
+            transform: scale(1.1);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .login-header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+            animation: slideDown 0.5s ease;
+        }
+
+        .login-header p {
+            margin: 10px 0 0;
+            color: #9ca5b3;
+            font-size: 16px;
+            animation: slideDown 0.5s ease 0.1s;
+            opacity: 0;
+            animation-fill-mode: forwards;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca5b3;
+            font-size: 18px;
+            transition: color 0.3s ease;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 15px 45px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+            padding-right: 45px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 0 2px var(--primary-color);
+        }
+
+        .form-input:focus + i {
+            color: var(--primary-color);
+        }
+
+        .form-group i.fa-lock {
+            left: 15px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #9ca5b3;
+            transition: color 0.3s ease;
+            z-index: 2;
+            background: none;
+            border: none;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+        }
+
+        .password-toggle:hover {
+            color: var(--primary-color);
+        }
+
+        .password-strength {
+            height: 4px;
+            background: #444;
+            margin-top: 10px;
+            border-radius: 2px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .password-strength-bar {
+            height: 100%;
+            width: 0;
+            transition: width 0.3s ease, background-color 0.3s ease;
+        }
+
+        .social-login {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .social-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+
+        .social-button:hover {
+            transform: scale(1.1);
+        }
+
+        .social-button.google { background: #DB4437; }
+        .social-button.facebook { background: #4267B2; }
+        .social-button.twitter { background: #1DA1F2; }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            color: #9ca5b3;
+        }
+
+        .remember-me input[type="checkbox"] {
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: var(--primary-color);
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        .login-button:hover::after {
+            width: 300px;
+            height: 300px;
+        }
+
+        .login-footer {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #9ca5b3;
+        }
+
+        .login-footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+            margin-left: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .login-footer a:hover {
+            text-decoration: underline;
+            color: var(--success-color);
+        }
+
+        .wallpaper-drawer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.95);
+            padding: 20px;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            max-height: 80vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .wallpaper-drawer.open {
+            transform: translateY(0);
+        }
+
+        .drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .drawer-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .drawer-close {
+            cursor: pointer;
+            padding: 5px;
+            color: #9ca5b3;
+            transition: color 0.3s ease;
+        }
+
+        .drawer-close:hover {
+            color: white;
+        }
+
+        .wallpaper-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .wallpaper-grid .wallpaper-option {
+            width: 100%;
+            height: 120px;
+            border-radius: 12px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .wallpaper-grid .wallpaper-option:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .wallpaper-grid .wallpaper-option.active::after {
+            content: '✓';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--primary-color);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .custom-wallpaper {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .custom-wallpaper input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .custom-wallpaper button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .custom-wallpaper button:hover {
+            background: var(--success-color);
+        }
+
+        .drawer-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--primary-color);
+            color: white;
+            padding: 15px;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, background-color 0.3s ease;
+            z-index: 1001;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .drawer-toggle i {
+            font-size: 20px;
+        }
+
+        .drawer-toggle:hover {
+            transform: scale(1.1);
+            background-color: var(--success-color);
+        }
+
+        .settings-panel {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            color: white;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        .settings-menu {
+            position: absolute;
+            top: 50px;
+            left: 0;
+            background: rgba(45, 45, 45, 0.95);
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+            min-width: 200px;
+        }
+
+        .settings-menu.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .settings-option {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .settings-option label {
+            color: #9ca5b3;
+        }
+
+        @media (max-width: 768px) {
+            .login-container {
+                padding: 30px 20px;
+                margin: 40px auto;
+            }
+
+            .wallpaper-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 15px;
+                padding: 15px;
+            }
+
+            .wallpaper-grid .wallpaper-option {
+                height: 100px;
+            }
+
+            .drawer-toggle {
+                width: 45px;
+                height: 45px;
+                padding: 12px;
+            }
+
+            .settings-panel,
+            .theme-switcher {
+                top: 10px;
+            }
+
+            .theme-button {
+                width: 25px;
+                height: 25px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .login-container {
+                padding: 20px 15px;
+                margin: 20px auto;
+            }
+
+            .login-header h1 {
+                font-size: 24px;
+            }
+
+            .form-input {
+                padding: 12px 40px;
+                font-size: 14px;
+            }
+
+            .wallpaper-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 10px;
+                padding: 10px;
+            }
+
+            .wallpaper-grid .wallpaper-option {
+                height: 80px;
+            }
+
+            .custom-wallpaper input {
+                padding: 10px;
+                font-size: 14px;
+            }
+
+            .drawer-toggle {
+                width: 40px;
+                height: 40px;
+                padding: 10px;
+                bottom: 15px;
+                right: 15px;
+            }
+
+            .drawer-toggle i {
+                font-size: 18px;
+            }
+        }
+
+        @media (max-height: 600px) {
+            .wallpaper-drawer {
+                max-height: 70vh;
+            }
+
+            .wallpaper-grid {
+                max-height: 40vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="settings-panel">
+        <i class="fas fa-cog" onclick="toggleSettings()"></i>
+        <div class="settings-menu" id="settingsMenu">
+            <div class="settings-option">
+                <label>Blur Effect</label>
+                <input type="range" min="0" max="20" value="10" onchange="updateBlur(this.value)">
+            </div>
+            <div class="settings-option">
+                <label>Container Opacity</label>
+                <input type="range" min="50" max="100" value="90" onchange="updateOpacity(this.value)">
+            </div>
+            <div class="settings-option">
+                <label>Theme Color</label>
+                <input type="color" value="#4CAF50" onchange="updateThemeColor(this.value)">
+            </div>
+        </div>
+    </div>
+
+    <div class="theme-switcher">
+        <div class="theme-button" style="background: #4CAF50" onclick="setTheme('#4CAF50')"></div>
+        <div class="theme-button" style="background: #2196F3" onclick="setTheme('#2196F3')"></div>
+        <div class="theme-button" style="background: #ff4444" onclick="setTheme('#ff4444')"></div>
+    </div>
+
+    <div class="login-container">
+        <div class="login-header">
+            <h1>Welcome to Veronica</h1>
+            <p>Your Riding Assistant</p>
+        </div>
+       <form id="loginForm" onsubmit="return handleLogin(event)">
+            <div class="form-group">
+                <input type="text" class="form-input" id="username" placeholder="Username or Email" required>
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="form-group">
+                <input type="password" class="form-input" id="password" placeholder="Password" required>
+                <i class="fas fa-lock"></i>
+                <button type="button" class="password-toggle" onclick="togglePassword()">
+                    <i class="fas fa-eye"></i>
+                </button>
+                <div class="password-strength">
+                    <div class="password-strength-bar"></div>
+                </div>
+            </div>
+            <div class="remember-me">
+                <input type="checkbox" id="remember" name="remember">
+                <label for="remember">Remember me</label>
+            </div>
+            <div class="social-login">
+                <button type="button" class="social-button google" onclick="socialLogin('google')">
+                    <i class="fab fa-google"></i>
+                </button>
+                <button type="button" class="social-button facebook" onclick="socialLogin('facebook')">
+                    <i class="fab fa-facebook-f"></i>
+                </button>
+                <button type="button" class="social-button twitter" onclick="socialLogin('twitter')">
+                    <i class="fab fa-twitter"></i>
+                </button>
+            </div>
+            <button type="submit" class="login-button">Login</button>
+            <div class="error-message" id="errorMessage"></div>
+            <div class="login-footer">
+                Don't have an account? <a href="#" onclick="showRegistration()">Sign up</a>
+            </div>
+        </form>
+    </div>
+
+    <button class="drawer-toggle" onclick="toggleWallpaperDrawer()" title="Change Wallpaper">
+        <i class="fas fa-images"></i>
+    </button>
+
+    <div class="wallpaper-drawer" id="wallpaperDrawer">
+        <div class="drawer-header">
+            <div class="drawer-title">Wallpaper Gallery</div>
+            <div class="drawer-close" onclick="toggleWallpaperDrawer()">
+                <i class="fas fa-times"></i>
+            </div>
+        </div>
+        <div class="custom-wallpaper">
+            <input type="text" id="customWallpaperUrl" placeholder="Paste wallpaper URL here">
+            <button onclick="setCustomWallpaper()">Apply Custom Wallpaper</button>
+        </div>
+        <div class="wallpaper-grid">
+            <div class="wallpaper-option" style="background-image: url('https://wallpaperaccess.com/full/2267772.jpg')" onclick="setWallpaper('https://wallpaperaccess.com/full/2267772.jpg', this)" title="Sport Bike 1"></div>
+            <div class="wallpaper-option" style="background-image: url('https://wallpaperaccess.com/full/1540005.jpg')" onclick="setWallpaper('https://wallpaperaccess.com/full/1540005.jpg', this)" title="Sport Bike 2"></div>
+            <div class="wallpaper-option" style="background-image: url('https://wallpaperaccess.com/full/2267783.jpg')" onclick="setWallpaper('https://wallpaperaccess.com/full/2267783.jpg', this)" title="Sport Bike 3"></div>
+            <div class="wallpaper-option" style="background-image: url('https://wallpaperaccess.com/full/2267793.jpg')" onclick="setWallpaper('https://wallpaperaccess.com/full/2267793.jpg', this)" title="Sport Bike 4"></div>
+            <div class="wallpaper-option active" style="background-image: url('https://wallpaperaccess.com/full/2267798.jpg')" onclick="setWallpaper('https://wallpaperaccess.com/full/2267798.jpg', this)" title="Sport Bike 5"></div>
+            <div class="wallpaper-option" style="background-image: url('https://wallpaperaccess.com/full/2267808.jpg')" onclick="setWallpaper('https://wallpaperaccess.com/full/2267808.jpg', this)" title="Sport Bike 6"></div>
+            <div class="wallpaper-option" style="background-image: url('https://wallpaperaccess.com/full/2267818.jpg')" onclick="setWallpaper('https://wallpaperaccess.com/full/2267818.jpg', this)" title="Sport Bike 7"></div>
+            <div class="wallpaper-option" style="background-image: url('https://wallpaperaccess.com/full/2267828.jpg')" onclick="setWallpaper('https://wallpaperaccess.com/full/2267828.jpg', this)" title="Sport Bike 8"></div>
+        </div>
+    </div>
+
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCCHQ1neszJqcpGyyffg8XiS3pGt84LGUw&callback=initMap"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script>
+        // Initialize default wallpaper
+        const defaultWallpaper = 'https://wallpaperaccess.com/full/2267798.jpg'; // Sport Bike 5
+        document.body.style.backgroundImage = `url('${defaultWallpaper}')`;
+
+        // Theme and customization functions
+        function setTheme(color) {
+            document.documentElement.style.setProperty('--primary-color', color);
+            
+            // Update wallpaper data with new theme
+            const savedWallpaperData = localStorage.getItem('veronicaAppWallpaperData');
+            if (savedWallpaperData) {
+                try {
+                    const data = JSON.parse(savedWallpaperData);
+                    data.theme = color;
+                    localStorage.setItem('veronicaAppWallpaperData', JSON.stringify(data));
+                } catch (error) {
+                    console.error('Error updating theme in wallpaper data:', error);
+                }
+            }
+        }
+
+        function toggleSettings() {
+            document.getElementById('settingsMenu').classList.toggle('active');
+        }
+
+        function updateBlur(value) {
+            document.documentElement.style.setProperty('--background-blur', `${value}px`);
+        }
+
+        function updateOpacity(value) {
+            document.documentElement.style.setProperty('--container-opacity', value / 100);
+        }
+
+        function updateThemeColor(color) {
+            setTheme(color);
+        }
+
+        function setWallpaper(url, element) {
+            document.body.style.backgroundImage = `url('${url}')`;
+            // Remove active class from all options
+            document.querySelectorAll('.wallpaper-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            // Add active class to selected option
+            element.classList.add('active');
+            // Save selected wallpaper to localStorage with a specific key for the entire app
+            localStorage.setItem('veronicaAppWallpaper', url);
+            
+            // Save additional wallpaper metadata
+            const wallpaperData = {
+                url: url,
+                timestamp: new Date().toISOString(),
+                theme: getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim()
+            };
+            localStorage.setItem('veronicaAppWallpaperData', JSON.stringify(wallpaperData));
+        }
+
+        // Function to apply the saved wallpaper and theme
+        function applySavedWallpaperAndTheme() {
+            const savedWallpaperData = localStorage.getItem('veronicaAppWallpaperData');
+            if (savedWallpaperData) {
+                try {
+                    const { url, theme } = JSON.parse(savedWallpaperData);
+                    document.body.style.backgroundImage = `url('${url}')`;
+                    setTheme(theme);
+                    
+                    // Update wallpaper selector UI
+                    const wallpaperOption = document.querySelector(`[style*="${url}"]`);
+                    if (wallpaperOption) {
+                        document.querySelectorAll('.wallpaper-option').forEach(option => {
+                            option.classList.remove('active');
+                        });
+                        wallpaperOption.classList.add('active');
+                    }
+                } catch (error) {
+                    console.error('Error applying saved wallpaper:', error);
+                    // Set default wallpaper if there's an error
+                    document.body.style.backgroundImage = `url('${defaultWallpaper}')`;
+                    const defaultWallpaperOption = document.querySelector(`[style*="${defaultWallpaper}"]`);
+                    if (defaultWallpaperOption) {
+                        document.querySelectorAll('.wallpaper-option').forEach(option => {
+                            option.classList.remove('active');
+                        });
+                        defaultWallpaperOption.classList.add('active');
+                    }
+                }
+            } else {
+                // Set default wallpaper if none is saved
+                document.body.style.backgroundImage = `url('${defaultWallpaper}')`;
+                const defaultWallpaperOption = document.querySelector(`[style*="${defaultWallpaper}"]`);
+                if (defaultWallpaperOption) {
+                    document.querySelectorAll('.wallpaper-option').forEach(option => {
+                        option.classList.remove('active');
+                    });
+                    defaultWallpaperOption.classList.add('active');
+                }
+            }
+        }
+
+        // Password visibility toggle
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.querySelector('.password-toggle');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+
+        // Password strength checker
+        document.getElementById('password').addEventListener('input', function(e) {
+            const password = e.target.value;
+            const strengthBar = document.querySelector('.password-strength');
+            const strengthIndicator = document.querySelector('.password-strength-bar');
+            
+            if (password) {
+                strengthBar.style.display = 'block';
+                const strength = calculatePasswordStrength(password);
+                strengthIndicator.style.width = `${strength}%`;
+                
+                if (strength < 33) {
+                    strengthIndicator.style.backgroundColor = 'var(--error-color)';
+                } else if (strength < 66) {
+                    strengthIndicator.style.backgroundColor = 'var(--warning-color)';
+                } else {
+                    strengthIndicator.style.backgroundColor = 'var(--success-color)';
+                }
+            } else {
+                strengthBar.style.display = 'none';
+            }
+        });
+
+        function calculatePasswordStrength(password) {
+            let strength = 0;
+            
+            // Length check
+            if (password.length >= 8) strength += 25;
+            
+            // Contains number
+            if (/\d/.test(password)) strength += 25;
+            
+            // Contains lowercase
+            if (/[a-z]/.test(password)) strength += 25;
+            
+            // Contains uppercase
+            if (/[A-Z]/.test(password)) strength += 25;
+            
+            return strength;
+        }
+
+        // Social login handlers
+        function socialLogin(provider) {
+            // Implement social login logic here
+            console.log(`Logging in with ${provider}`);
+            showSuccess(`Initiating ${provider} login...`);
+        }
+
+        // Enhanced login handler with validation (AJAX-based, like login.html)
+        function handleLogin(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const remember = document.getElementById('remember').checked;
+
+            // Frontend validation
+            if (!username) {
+                showError('Please enter your username or email');
+                return false;
+            }
+            if (!password) {
+                showError('Please enter your password');
+                return false;
+            }
+
+            // Prepare form data
+            const formData = new FormData();
+            // The backend expects 'email' as the field name
+            formData.append('email', username);
+            formData.append('password', password);
+
+            // AJAX request to login.php
+            fetch('login.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                // If redirected, check the URL for success or error
+                if (response.redirected) {
+                    const url = new URL(response.url);
+                    if (url.searchParams.get('success') === '1') {
+                        // Store user info if remember is checked
+                        if (remember) {
+                            localStorage.setItem('username', username);
+                        } else {
+                            localStorage.removeItem('username');
+                        }
+                        showSuccess('Login successful! Redirecting...');
+                        setTimeout(() => {
+                            window.location.href = 'veronica.html';
+                        }, 1000);
+                    } else if (url.searchParams.get('error') === '1') {
+                        showError('Username or password is incorrect');
+                    } else {
+                        showError('Unexpected response. Please try again.');
+                    }
+                } else {
+                    // Not redirected, show generic error
+                    showError('Login failed. Please try again.');
+                }
+            })
+            .catch(() => {
+                showError('Network error. Please try again.');
+            });
+
+            return false;
+        }
+
+        function showError(message) {
+            const errorElement = document.getElementById('errorMessage');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+            errorElement.style.color = 'var(--error-color)';
+            setTimeout(() => {
+                errorElement.style.display = 'none';
+            }, 3000);
+        }
+
+        function showSuccess(message) {
+            const errorElement = document.getElementById('errorMessage');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+            errorElement.style.color = 'var(--success-color)';
+            setTimeout(() => {
+                errorElement.style.display = 'none';
+            }, 3000);
+        }
+
+        // Update the window.onload function
+        window.onload = () => {
+            // Apply saved wallpaper and theme
+            applySavedWallpaperAndTheme();
+
+            const storedUsername = localStorage.getItem('username');
+            if (storedUsername) {
+                document.getElementById('username').value = storedUsername;
+                document.getElementById('remember').checked = true;
+            }
+
+            // Initialize password strength indicator
+            const passwordInput = document.getElementById('password');
+            if (passwordInput.value) {
+                const strength = calculatePasswordStrength(passwordInput.value);
+                const strengthBar = document.querySelector('.password-strength');
+                const strengthIndicator = document.querySelector('.password-strength-bar');
+                strengthBar.style.display = 'block';
+                strengthIndicator.style.width = `${strength}%`;
+            }
+        };
+
+        // Close settings menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const settingsMenu = document.getElementById('settingsMenu');
+            const settingsPanel = document.querySelector('.settings-panel');
+            
+            if (!settingsPanel.contains(event.target)) {
+                settingsMenu.classList.remove('active');
+            }
+        });
+
+        function toggleWallpaperDrawer() {
+            const drawer = document.getElementById('wallpaperDrawer');
+            drawer.classList.toggle('open');
+        }
+
+        function setCustomWallpaper() {
+            const urlInput = document.getElementById('customWallpaperUrl');
+            const url = urlInput.value.trim();
+            
+            if (!url) {
+                showError('Please enter a valid wallpaper URL');
+                return;
+            }
+
+            // Create a temporary image to verify the URL
+            const img = new Image();
+            img.onload = function() {
+                setWallpaper(url, null);
+                showSuccess('Custom wallpaper applied successfully');
+                urlInput.value = '';
+            };
+            img.onerror = function() {
+                showError('Invalid image URL or image could not be loaded');
+            };
+            img.src = url;
+        }
+
+        function showRegistration() {
+            // Add your registration page logic here
+            showSuccess('Redirecting to registration page...');
+            setTimeout(() => {
+                // Replace with your actual registration page URL
+                window.location.href = 'register.html';
+            }, 1500);
+        }
+
+        // Function to update live location section
+        function updateLiveLocation(snapshot) {
+            const data = snapshot.val();
+            if (!data) return;
+            document.getElementById('live-coords').textContent = `${data.latitude}, ${data.longitude}`;
+            document.getElementById('live-place').textContent = data.place_name || "-";
+            // Show map
+            if (window.initMap) {
+                window.initMap(data.latitude, data.longitude);
+            } else {
+                window.pendingMapCoords = {lat: data.latitude, lon: data.longitude};
+            }
+        }
+
+        // Listen for live location updates
+        database.ref('live_location').on('value', updateLiveLocation);
+
+        // Google Maps integration
+        function initMap(lat, lon) {
+            if (!lat || !lon) {
+                if (window.pendingMapCoords) {
+                    lat = window.pendingMapCoords.lat;
+                    lon = window.pendingMapCoords.lon;
+                } else {
+                    return;
+                }
+            }
+            const map = new google.maps.Map(document.getElementById("map"), {
+                center: { lat: parseFloat(lat), lng: parseFloat(lon) },
+                zoom: 15,
+            });
+            new google.maps.Marker({
+                position: { lat: parseFloat(lat), lng: parseFloat(lon) },
+                map: map,
+            });
+        }
+        window.initMap = initMap;
+
+        // Firebase Configuration (same as gyroscope.html for consistency)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDoB5krBcbQOzcCMAAyCLYF71bKCnSyhG4",
+            authDomain: "real-time-accident-detection.firebaseapp.com",
+            databaseURL: "https://real-time-accident-detection-default-rtdb.firebaseio.com",
+            projectId: "real-time-accident-detection",
+            storageBucket: "real-time-accident-detection.firebasestorage.app",
+            messagingSenderId: "1023843919578",
+            appId: "1:1023843919578:web:02b65e3ca9d1a4919c67e3"
+        };
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const database = firebase.database();
+
+        // Function to save location to Firebase
+        function saveLocationToFirebase(lat, lon, placeName) {
+            database.ref('live_location').set({
+                latitude: lat,
+                longitude: lon,
+                place_name: placeName || ""
+            });
+        }
+
+        // Function to get place name from Google Maps Geocoding API
+        function getPlaceName(lat, lon, callback) {
+            const apiKey = "AIzaSyCCHQ1neszJqcpGyyffg8XiS3pGt84LGUw";
+            fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lon}&key=${apiKey}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.results && data.results.length > 0) {
+                        callback(data.results[0].formatted_address);
+                    } else {
+                        callback("");
+                    }
+                })
+                .catch(() => callback(""));
+        }
+
+        // Request location and save to Firebase on page load
+        function requestAndSaveLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        getPlaceName(lat, lon, (placeName) => {
+                            saveLocationToFirebase(lat, lon, placeName);
+                        });
+                    },
+                    (error) => {
+                        console.warn("Location permission denied or unavailable.");
+                    }
+                );
+            } else {
+                console.warn("Geolocation is not supported by this browser.");
+            }
+        }
+
+        // Call this on page load
+        window.addEventListener('DOMContentLoaded', requestAndSaveLocation);
+    </script>
+     <div id="loginError" style="
+        display: none;
+        position: fixed;
+        top: 30px;
+        right: 30px;
+        background-color: #ff4d4d;
+        color: white;
+        padding: 12px 18px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        font-weight: bold;
+        z-index: 1000;
+        ">
+            Username or password doesn't match!
+      </div>
+
+    <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('error') === '1') {
+        const errorBox = document.getElementById('loginError');
+        errorBox.style.display = 'block';
+        setTimeout(() => {
+            errorBox.style.display = 'none';
+        }, 3000);
+    }
+   </script>
+</body>
+</html> 

@@ -1,0 +1,3857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Veronica</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --error-color: #ff4444;
+            --success-color: #00C851;
+            --warning-color: #ffbb33;
+            --background-blur: 10px;
+            --container-opacity: 0.9;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            font-family: 'Arial', sans-serif;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: background-image 0.5s ease;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            backdrop-filter: blur(var(--background-blur)) brightness(0.7);
+            z-index: -1;
+            transition: backdrop-filter 0.3s ease;
+        }
+
+        .safety-status {
+            position: fixed;
+            top: 20px;
+            right: 80px;
+            background: rgba(45, 45, 45, 0.9);
+            padding: 10px 20px;
+            border-radius: 15px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            max-width: 80%;
+            font-size: 14px;
+        }
+
+        .safety-status i {
+            color: #4CAF50;
+        }
+
+        .emergency-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: #ff4444;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            animation: pulse 2s infinite;
+            border: none;
+        }
+
+        .emergency-button i {
+            color: white;
+            font-size: 24px;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.7);
+            }
+            70% {
+                transform: scale(1.1);
+                box-shadow: 0 0 0 10px rgba(255, 68, 68, 0);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(255, 68, 68, 0);
+            }
+        }
+
+        .profile-icon {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+            z-index: 1000;
+        }
+
+        .profile-icon:hover {
+            transform: scale(1.1);
+        }
+
+        .profile-icon i {
+            color: #2d2d2d;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 100px auto 20px;
+            padding: 20px;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        .header {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+            padding: 20px 0;
+            background: rgba(45, 45, 45, 0.5);
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .edit-name {
+            background: none;
+            border: 1px solid white;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .edit-name:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .output-box {
+            background: #2d2d2d;
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            min-height: 150px;
+            margin-bottom: 20px;
+            overflow-y: auto;
+            font-size: 16px;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .input-box {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #ffffff;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .voice-button {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+        }
+
+        .voice-button:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 1);
+        }
+
+        .voice-button i {
+            color: #2d2d2d;
+        }
+
+        .action-icons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .action-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 24px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .action-icon:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 1);
+        }
+
+        .action-icon i {
+            color: #2d2d2d;
+        }
+
+        .action-icon::after {
+            content: attr(title);
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(45, 45, 45, 0.9);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .action-icon:hover::after {
+            opacity: 1;
+        }
+
+        .music-player {
+            margin-top: 20px;
+            display: none;
+        }
+
+        #map-container {
+            display: none;
+            margin-top: 20px;
+            height: 400px;
+            width: 100%;
+            border-radius: 15px;
+            overflow: hidden;
+            background: #2d2d2d;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.3s ease-in-out;
+        }
+
+        #map-container.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .map-header {
+            background: #1a1a1a;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #3d3d3d;
+        }
+
+        .map-title {
+            color: white;
+            font-size: 16px;
+            margin: 0;
+        }
+
+        .map-close {
+            background: none;
+            border: none;
+            color: #9ca5b3;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 5px;
+            transition: color 0.2s ease;
+        }
+
+        .map-close:hover {
+            color: white;
+        }
+
+        .map-content {
+            height: calc(100% - 45px);
+            width: 100%;
+        }
+
+        #weather-container {
+            display: none;
+            margin-top: 20px;
+            width: 100%;
+            border-radius: 15px;
+            overflow: hidden;
+            background: #2d2d2d;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.3s ease-in-out;
+        }
+
+        #weather-container.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .weather-header {
+            background: #1a1a1a;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #3d3d3d;
+        }
+
+        .weather-title {
+            color: white;
+            font-size: 16px;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .weather-close {
+            background: none;
+            border: none;
+            color: #9ca5b3;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 5px;
+            transition: color 0.2s ease;
+        }
+
+        .weather-close:hover {
+            color: white;
+        }
+
+        .weather-content {
+            padding: 20px;
+            color: white;
+        }
+
+        .weather-main {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .weather-temp {
+            font-size: 48px;
+            font-weight: bold;
+        }
+
+        .weather-desc {
+            text-align: center;
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .weather-details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .weather-detail-item {
+            text-align: center;
+        }
+
+        .weather-detail-label {
+            font-size: 12px;
+            color: #9ca5b3;
+            margin-bottom: 5px;
+        }
+
+        .weather-detail-value {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 80px auto 20px;
+                padding: 15px;
+            }
+
+            .header {
+                padding: 15px 0;
+                margin-bottom: 20px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+                margin: 0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 5px;
+            }
+
+            .edit-name {
+                font-size: 12px;
+                padding: 4px 12px;
+            }
+
+            .safety-status {
+                top: 10px;
+                right: 60px;
+                padding: 8px 15px;
+                font-size: 12px;
+                max-width: 70%;
+            }
+
+            .profile-icon {
+                top: 10px;
+                left: 10px;
+                width: 35px;
+                height: 35px;
+                font-size: 16px;
+            }
+
+            .output-box {
+                font-size: 14px;
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+
+            .input-container {
+                margin-bottom: 20px;
+            }
+
+            .input-box {
+                font-size: 14px;
+                padding: 12px;
+            }
+
+            .voice-button {
+                width: 45px;
+                height: 45px;
+                font-size: 18px;
+            }
+
+            .action-icons {
+                gap: 15px;
+                margin-top: 20px;
+            }
+
+            .action-icon {
+                width: 45px;
+                height: 45px;
+                font-size: 18px;
+            }
+
+            .action-icon::after {
+                font-size: 11px;
+                bottom: -20px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .safety-status {
+                font-size: 11px;
+                padding: 6px 12px;
+                max-width: 65%;
+            }
+
+            .header h1 {
+                font-size: 18px;
+            }
+
+            .action-icons {
+                gap: 10px;
+            }
+
+            .action-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+        }
+
+        #traffic-container,
+        #contacts-container,
+        #system-container {
+            display: none;
+            margin-top: 20px;
+            width: 100%;
+            border-radius: 15px;
+            overflow: hidden;
+            background: #2d2d2d;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.3s ease-in-out;
+        }
+
+        #traffic-container.show,
+        #contacts-container.show,
+        #system-container.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .traffic-content,
+        .contacts-content,
+        .system-content {
+            padding: 20px;
+            color: white;
+        }
+
+        .traffic-status,
+        .contacts-list,
+        .system-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .traffic-detail-item,
+        .contact-item,
+        .system-stat-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .traffic-detail-label,
+        .contact-name,
+        .stat-label {
+            font-size: 14px;
+            color: #9ca5b3;
+        }
+
+        .traffic-detail-value,
+        .contact-number,
+        .stat-value {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .contact-call,
+        .system-actions button,
+        .add-contact button {
+            background: #4CAF50;
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .contact-call:hover,
+        .system-actions button:hover,
+        .add-contact button:hover {
+            background: #45a049;
+        }
+
+        .stat-value.active {
+            color: #4CAF50;
+        }
+
+        .system-actions {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .add-contact {
+            text-align: center;
+        }
+
+        .stat-value.warning {
+            color: #ffa500;
+        }
+
+        .stat-value.error {
+            color: #ff4444;
+        }
+
+        .system-stat-item.error-state {
+            border: 1px solid #ff4444;
+        }
+
+        .system-stat-item.warning-state {
+            border: 1px solid #ffa500;
+        }
+
+        /* New styles for song options hover effect */
+        .song-option:hover {
+            background: rgba(255, 255, 255, 0.2) !important;
+            transform: translateX(5px);
+            transition: all 0.2s ease;
+        }
+
+        .system-status {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            background: rgba(45, 45, 45, 0.9);
+            padding: 10px 20px;
+            border-radius: 15px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            font-size: 14px;
+        }
+
+        .status-icon {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-icon i {
+            font-size: 16px;
+        }
+
+        .status-icon.active i {
+            color: #4CAF50;
+        }
+
+        .status-icon.inactive i {
+            color: #ff4444;
+        }
+
+        .profile-menu {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 70px;  /* Moved right to not overlap with profile icon */
+            background: rgba(45, 45, 45, 0.95);
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            min-width: 200px;
+        }
+
+        .profile-menu.show {
+            display: block;
+        }
+
+        .profile-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            color: white;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background 0.3s ease;
+        }
+
+        .profile-menu-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .profile-menu-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .profile-menu-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 10px 0;
+        }
+
+        @media (max-width: 600px) {
+            .system-status {
+                top: 60px;
+                right: 60px;
+                padding: 8px 15px;
+                font-size: 12px;
+            }
+
+            .profile-menu {
+                left: 60px;
+                top: 10px;
+                min-width: 180px;
+            }
+        }
+
+        .error-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #ff4444;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-width: 300px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        .error-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .error-details {
+            font-size: 0.8em;
+            margin-top: 5px;
+            opacity: 0.8;
+        }
+        .error-close {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+       
+        /* Adjust safety status position to not overlap with nav icons */
+        .safety-status {
+            right: 60px;
+        }
+
+        @media (max-width: 600px) {
+            .safety-status {
+                right: 60px;
+            }
+        }
+
+        .gyroscope-button {
+            position: fixed;
+            bottom: 20px;
+            right: 90px;
+            width: 60px;
+            height: 60px;
+            background: #4CAF50;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            animation: pulse 2s infinite;
+            border: none;
+        }
+
+        .gyroscope-button i {
+            color: white;
+            font-size: 24px;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.7);
+            }
+            70% {
+                transform: scale(1.1);
+                box-shadow: 0 0 0 10px rgba(255, 68, 68, 0);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(255, 68, 68, 0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="safety-status">
+        <i class="fas fa-shield-alt"></i>
+        <span>Safety Status: Active</span>
+    </div>
+
+   
+        <a href="login.html" class="nav-link">
+            <i class="fas fa-sign-out-alt"></i>
+            
+        </a>
+    </div>
+
+    <div class="profile-icon">
+        <i class="fas fa-user"></i>
+    </div>
+    <button class="gyroscope-button" onclick="window.location.href='gyroscope.html'" title="Gyroscope Monitor">
+        <i class="fas fa-compass"></i>
+    </button>
+    <button class="emergency-button" onclick="triggerEmergency()" title="Emergency SOS">
+        <i class="fas fa-exclamation-triangle"></i>
+    </button>
+
+    <div class="container">
+        <div class="header">
+            <h1>Hello <span id="rider-name">Rider</span></h1>
+            <button class="edit-name" onclick="editName()">Edit</button>
+        </div>
+
+        <div class="output-box" id="output"></div>
+
+        <div class="input-container">
+            <input type="text" class="input-box" id="input" placeholder="Type your message or say 'Hey Veronica'...">
+            <button class="voice-button" onclick="toggleVoiceRecognition()">
+                <i class="fas fa-microphone"></i>
+            </button>
+        </div>
+
+        <div class="action-icons">
+            <div class="action-icon" title="Navigation" onclick="window.location.href='navigation.html'">
+                <i class="fas fa-map-marked-alt"></i>
+            </div>
+            <div class="action-icon" id="music-icon" title="Music">
+                <i class="fas fa-music"></i>
+            </div>
+            <div class="action-icon" title="Weather">
+                <i class="fas fa-cloud-sun"></i>
+            </div>
+            <div class="action-icon" title="Traffic Alerts">
+                <i class="fas fa-traffic-light"></i>
+            </div>
+            <div class="action-icon" title="Emergency Contacts">
+                <i class="fas fa-phone-alt"></i>
+            </div>
+            <div class="action-icon" title="System Status">
+                <i class="fas fa-heartbeat"></i>
+            </div>
+        </div>
+
+        <div class="music-player" id="music-player"></div>
+        <div id="map-container">
+            <div class="map-header">
+                <h3 class="map-title">Location Map</h3>
+                <button class="map-close" onclick="toggleMap()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="map-content"></div>
+        </div>
+        <div id="weather-container">
+            <div class="weather-header">
+                <h3 class="weather-title">
+                    <i class="fas fa-cloud-sun"></i>
+                    Weather Updates
+                </h3>
+                <button class="weather-close" onclick="toggleWeather()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="weather-content">
+                <div class="weather-main">
+                    <div class="weather-temp">--°C</div>
+                    <i class="fas fa-cloud-sun fa-2x"></i>
+                </div>
+                <div class="weather-desc">Loading weather data...</div>
+                <div class="weather-details">
+                    <div class="weather-detail-item">
+                        <div class="weather-detail-label">Humidity</div>
+                        <div class="weather-detail-value">--%</div>
+                    </div>
+                    <div class="weather-detail-item">
+                        <div class="weather-detail-label">Wind Speed</div>
+                        <div class="weather-detail-value">-- km/h</div>
+                    </div>
+                    <div class="weather-detail-item">
+                        <div class="weather-detail-label">Feels Like</div>
+                        <div class="weather-detail-value">--°C</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="traffic-container">
+            <div class="weather-header">
+                <h3 class="weather-title">
+                    <i class="fas fa-traffic-light"></i>
+                    Traffic Updates
+                </h3>
+                <button class="weather-close" onclick="toggleTraffic()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="traffic-content">
+                <div class="traffic-status">
+                    <div class="traffic-icon">
+                        <i class="fas fa-road fa-2x"></i>
+                    </div>
+                    <div class="traffic-info">
+                        <div class="traffic-condition">Checking traffic...</div>
+                        <div class="traffic-details">
+                            <div class="traffic-detail-item">
+                                <div class="traffic-detail-label">Road Status</div>
+                                <div class="traffic-detail-value">--</div>
+                            </div>
+                            <div class="traffic-detail-item">
+                                <div class="traffic-detail-label">Average Speed</div>
+                                <div class="traffic-detail-value">-- km/h</div>
+                            </div>
+                            <div class="traffic-detail-item">
+                                <div class="traffic-detail-label">Incidents</div>
+                                <div class="traffic-detail-value">--</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="contacts-container">
+            <div class="weather-header">
+                <h3 class="weather-title">
+                    <i class="fas fa-phone-alt"></i>
+                    Emergency Contacts
+                </h3>
+                <button class="weather-close" onclick="toggleContacts()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="contacts-content">
+                <div class="contacts-list">
+                    <div class="contact-item">
+                        <i class="fas fa-ambulance"></i>
+                        <div class="contact-info">
+                            <div class="contact-name">Emergency Services</div>
+                            <div class="contact-number">+919112631053</div>
+                        </div>
+                        <button class="contact-call" onclick="callEmergency('+919112631053')">
+                            <i class="fas fa-phone"></i>
+                        </button>
+                    </div>
+                    <div class="add-contact">
+                        <button onclick="addEmergencyContact()">
+                            <i class="fas fa-plus"></i> Add Emergency Contact
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="system-container">
+            <div class="weather-header">
+                <h3 class="weather-title">
+                    <i class="fas fa-heartbeat"></i>
+                    System Status
+                </h3>
+                <button class="weather-close" onclick="toggleSystem()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="system-content">
+                <div class="system-stats">
+                    <div class="system-stat-item">
+                        <div class="stat-icon"><i class="fas fa-shield-alt"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-label">Safety System</div>
+                            <div class="stat-value active">Active</div>
+                        </div>
+                    </div>
+                    <div class="system-stat-item">
+                        <div class="stat-icon"><i class="fas fa-satellite"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-label">GPS Signal</div>
+                            <div class="stat-value" id="gps-status">Checking...</div>
+                        </div>
+                    </div>
+                    <div class="system-stat-item">
+                        <div class="stat-icon"><i class="fas fa-wifi"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-label">Network Status</div>
+                            <div class="stat-value" id="network-status">Checking...</div>
+                        </div>
+                    </div>
+                    <div class="system-stat-item">
+                        <div class="stat-icon"><i class="fas fa-microphone"></i></div>
+                        <div class="stat-info">
+                            <div class="stat-label">Voice Assistant</div>
+                            <div class="stat-value active">Ready</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="system-actions">
+                    <button onclick="runDiagnostics()">
+                        <i class="fas fa-sync"></i> Run Diagnostics
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize map
+        let map;
+        let marker;
+        let recognition = null;  // Single declaration for recognition variable
+        let isListening = false;
+        let permissionDenied = false;
+        let lastPermissionCheck = null;
+        const PERMISSION_CHECK_INTERVAL = 5000; // 5 seconds
+        const API_KEY = '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';
+        const WEATHER_API_KEY = '83792040a9776cd8a01b288ff309e59f';
+        const YOUTUBE_API_KEY = 'AIzaSyCCHQ1neszJqcpGyyffg8XiS3pGt84LGUw';
+        const TRAFFIC_API_KEY = 'AIzaSyCCHQ1neszJqcpGyyffg8XiS3pGt84LGU' ;
+        
+
+        function initMap() {
+            // Default location (you can change these coordinates)
+            const defaultLocation = { lat: 20.5937, lng: 78.9629 }; // Center of India
+
+            map = new google.maps.Map(document.querySelector('.map-content'), {
+                zoom: 5,
+                center: defaultLocation,
+                styles: [
+                    {
+                        "featureType": "all",
+                        "elementType": "geometry",
+                        "stylers": [{"color": "#242f3e"}]
+                    },
+                    {
+                        "featureType": "all",
+                        "elementType": "labels.text.stroke",
+                        "stylers": [{"lightness": -80}]
+                    },
+                    {
+                        "featureType": "administrative",
+                        "elementType": "labels.text.fill",
+                        "stylers": [{"color": "#746855"}]
+                    },
+                    {
+                        "featureType": "road",
+                        "elementType": "geometry",
+                        "stylers": [{"color": "#2b3544"}]
+                    },
+                    {
+                        "featureType": "road",
+                        "elementType": "labels.text.fill",
+                        "stylers": [{"color": "#9ca5b3"}]
+                    },
+                    {
+                        "featureType": "water",
+                        "elementType": "geometry",
+                        "stylers": [{"color": "#17263c"}]
+                    }
+                ]
+            });
+
+            marker = new google.maps.Marker({
+                position: defaultLocation,
+                map: map,
+                title: 'Your Location'
+            });
+
+            // Get user's location if available
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const pos = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        map.setCenter(pos);
+                        marker.setPosition(pos);
+                    },
+                    () => {
+                        console.log('Error: The Geolocation service failed.');
+                    }
+                );
+            }
+        }
+
+        function toggleMap() {
+            const mapContainer = document.getElementById('map-container');
+            if (mapContainer.style.display === 'none') {
+                mapContainer.style.display = 'block';
+                // Trigger reflow
+                mapContainer.offsetHeight;
+                mapContainer.classList.add('show');
+                speakResponse("Opening map. You can see your current location.");
+                document.getElementById('output').textContent = "Map opened. Your location is marked.";
+            } else {
+                mapContainer.classList.remove('show');
+                setTimeout(() => {
+                    mapContainer.style.display = 'none';
+                    speakResponse("Closing map.");
+                    document.getElementById('output').textContent = "Map closed.";
+                }, 300);
+            }
+        }
+
+        // Function to greet the user with a voice message
+        function greetUser() {
+            const greeting = "Hello, I am Veronica, your riding assistant. I'm monitoring your safety and ready to help. How may I assist you?";
+            responsiveVoice.speak(
+                greeting,
+                "Hindi Female",
+                {
+                    rate: 1.0,
+                    pitch: 1,
+                    volume: 1,
+                    onend: () => {
+                        // After greeting ends, wait 13 seconds then activate microphone
+                        setTimeout(() => {
+                            speakResponse("Activating voice commands");
+                            document.getElementById('output').textContent = "Microphone activated, please speak your command...";
+                            toggleVoiceRecognition();
+                        }, 13000);
+                    }
+                }
+            );
+            document.getElementById('output').textContent = greeting;
+        }
+
+        // Trigger the greeting when the page loads
+        window.addEventListener('load', () => {
+            checkStoredPermissions();
+            requestPermissions();
+            updateSystemStatus();
+            greetUser(); // This will now trigger the microphone activation after 13 seconds
+            // Update system status every 300seconds
+            setInterval(updateSystemStatus, 300000);
+        });
+
+        // Your existing JavaScript code
+        function editName() {
+            const newName = prompt('Enter new name:');
+            if (newName) {
+                document.getElementById('rider-name').textContent = newName;
+            }
+        }
+
+        async function getChatGPTResponse(prompt) {
+            try {
+                const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: "gpt-3.5-turbo",
+                        messages: [{ role: "user", content: prompt }]
+                    })
+                });
+
+                const data = await response.json();
+                return data.choices[0].message.content;
+            } catch (error) {
+                console.error('Error:', error);
+                return "Sorry, I'm having trouble connecting to the server.";
+            }
+        }
+
+        // Permission states
+        let permissionStates = {
+            location: false,
+            microphone: false,
+            notification: false
+        };
+
+        // Check stored permissions
+        function checkStoredPermissions() {
+            const stored = localStorage.getItem('permissionStates');
+            if (stored) {
+                permissionStates = JSON.parse(stored);
+            }
+        }
+
+        // Save permission states
+        function savePermissionStates() {
+            localStorage.setItem('permissionStates', JSON.stringify(permissionStates));
+        }
+
+        // Update permission handling
+        async function requestPermissions() {
+            checkStoredPermissions();
+
+            if (!permissionStates.microphone && navigator.mediaDevices) {
+                try {
+                    await navigator.mediaDevices.getUserMedia({ audio: true });
+                    permissionStates.microphone = true;
+                    savePermissionStates();
+                    console.log('Microphone permission granted');
+                } catch (err) {
+                    console.error('Microphone permission denied:', err);
+                    showPermissionAlert('microphone');
+                }
+            }
+
+            if (!permissionStates.notification && 'Notification' in window) {
+                try {
+                    const permission = await Notification.requestPermission();
+                    permissionStates.notification = permission === 'granted';
+                    savePermissionStates();
+                    if (permission === 'granted') {
+                        console.log('Notification permission granted');
+                    }
+                } catch (err) {
+                    console.error('Notification permission error:', err);
+                }
+            }
+        }
+
+        function showPermissionAlert(type) {
+            const messages = {
+                microphone: 'Microphone access is required for voice commands. Please enable it in your browser settings.',
+                notification: 'Notifications are required for important alerts. Please enable them in your browser settings.'
+            };
+
+            const container = document.createElement('div');
+            container.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(0, 0, 0, 0.9);
+                padding: 20px;
+                border-radius: 10px;
+                color: white;
+                z-index: 1000;
+                max-width: 80%;
+                text-align: center;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            `;
+
+            container.innerHTML = `
+                <div style="margin-bottom: 15px;">
+                    <i class="fas fa-exclamation-triangle" style="color: #ffd700; font-size: 24px;"></i>
+                </div>
+                <div style="margin-bottom: 15px;">${messages[type]}</div>
+                <button onclick="this.parentElement.remove(); requestPermissions();" style="
+                    background: #4CAF50;
+                    border: none;
+                    color: white;
+                    padding: 10px 20px;
+                    border-radius: 5px;
+                    cursor: pointer;
+                ">Try Again</button>
+                <button onclick="this.parentElement.remove();" style="
+                    background: none;
+                    border: 1px solid #9ca5b3;
+                    color: #9ca5b3;
+                    padding: 10px 20px;
+                    border-radius: 5px;
+                    margin-left: 10px;
+                    cursor: pointer;
+                ">Close</button>
+            `;
+
+            document.body.appendChild(container);
+        }
+
+        // Remove the old speech recognition code and keep only the new implementation
+        function initializeSpeechRecognition() {
+            if (!('webkitSpeechRecognition' in window)) {
+                console.error('Speech recognition not supported');
+                return;
+            }
+
+            recognition = new webkitSpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+
+            recognition.onstart = () => {
+                isListening = true;
+                updateVoiceStatus(true);
+                console.log('Voice recognition started');
+            };
+
+            recognition.onend = () => {
+                isListening = false;
+                updateVoiceStatus(false);
+                console.log('Voice recognition ended');
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+                handleRecognitionError(event.error);
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = Array.from(event.results)
+                    .map(result => result[0].transcript)
+                    .join('');
+                handleVoiceCommand(transcript);
+            };
+        }
+
+        function handleRecognitionError(error) {
+            switch (error) {
+                case 'not-allowed':
+                    permissionDenied = true;
+                    showError('Microphone permission denied. Please enable it in your browser settings.');
+                    break;
+                case 'no-speech':
+                    console.log('No speech detected');
+                    break;
+                case 'aborted':
+                    console.log('Speech recognition aborted');
+                    break;
+                case 'audio-capture':
+                    showError('No microphone found. Please connect a microphone and try again.');
+                    break;
+                case 'network':
+                    showError('Network error occurred. Please check your connection.');
+                    break;
+                case 'service-not-available':
+                    showError('Speech recognition service is not available. Please try again later.');
+                    break;
+                default:
+                    console.error('Unknown error:', error);
+            }
+        }
+
+        function checkMicrophonePermission() {
+            if (permissionDenied) {
+                return false;
+            }
+
+            const now = Date.now();
+            if (lastPermissionCheck && (now - lastPermissionCheck) < PERMISSION_CHECK_INTERVAL) {
+                return true;
+            }
+
+            lastPermissionCheck = now;
+            return navigator.mediaDevices && navigator.mediaDevices.getUserMedia;
+        }
+
+        function requestMicrophonePermission() {
+            if (!checkMicrophonePermission()) {
+                return;
+            }
+
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(() => {
+                    permissionDenied = false;
+                    console.log('Microphone permission granted');
+                })
+                .catch(error => {
+                    permissionDenied = true;
+                    console.error('Microphone permission error:', error);
+                    showError('Microphone permission denied. Please enable it in your browser settings.');
+                });
+        }
+
+        function toggleVoiceRecognition() {
+            if (!recognition) {
+                initializeSpeechRecognition();
+            }
+
+            if (!checkMicrophonePermission()) {
+                requestMicrophonePermission();
+                return;
+            }
+
+            if (isListening) {
+                recognition.stop();
+            } else {
+                recognition.start();
+            }
+        }
+
+        // Update the voice status indicator
+        function updateVoiceStatus(isActive) {
+            const voiceButton = document.querySelector('.voice-button');
+            if (voiceButton) {
+                voiceButton.classList.toggle('active', isActive);
+                voiceButton.querySelector('i').className = isActive ? 'fas fa-microphone-slash' : 'fas fa-microphone';
+            }
+        }
+
+        // Initialize speech recognition when the page loads
+        window.addEventListener('load', () => {
+            initializeSpeechRecognition();
+            // Check for saved permission state
+            const savedPermissionState = localStorage.getItem('microphonePermission');
+            if (savedPermissionState === 'denied') {
+                permissionDenied = true;
+            }
+        });
+
+        // Save permission state when it changes
+        window.addEventListener('beforeunload', () => {
+            if (permissionDenied) {
+                localStorage.setItem('microphonePermission', 'denied');
+            }
+        });
+
+        // Modify startVoiceRecognition function
+        async function startVoiceRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                const message = "Speech recognition is not supported in your browser.";
+                document.getElementById('output').textContent = message;
+                speakResponse(message);
+                return;
+            }
+
+            try {
+                // Request microphone permission first
+                await navigator.mediaDevices.getUserMedia({ audio: true });
+
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+                recognition.lang = 'en-US';
+
+                recognition.onstart = () => {
+                    document.querySelector('.voice-button i').style.color = '#4CAF50';
+                    console.log('Voice recognition started');
+                };
+
+                recognition.onend = () => {
+                    document.querySelector('.voice-button i').style.color = '#2d2d2d';
+                    console.log('Voice recognition ended');
+                };
+
+                recognition.onerror = (event) => {
+                    if (event.error === 'not-allowed') {
+                        showPermissionAlert('microphone');
+                    } else {
+                        let errorMessage = "An error occurred with voice recognition. Please try again.";
+                        document.getElementById('output').textContent = errorMessage;
+                        speakResponse(errorMessage);
+                    }
+                };
+
+            recognition.onresult = async (event) => {
+                const transcript = event.results[0][0].transcript.toLowerCase();
+                document.getElementById('input').value = transcript;
+                    document.getElementById('output').textContent = `Command received: ${transcript}`;
+                handleUserCommand(transcript);
+            };
+
+            recognition.start();
+            } catch (error) {
+                console.error('Voice recognition error:', error);
+                if (error.name === 'NotAllowedError') {
+                    showPermissionAlert('microphone');
+            } else {
+                    const message = "Failed to start voice recognition. Please try again.";
+                    document.getElementById('output').textContent = message;
+                    speakResponse(message);
+                }
+            }
+        }
+
+        // Modify getWeather function
+        async function getWeather() {
+            try {
+                toggleWeather('open');
+                
+                // Show loading state
+                document.querySelector('.weather-desc').textContent = 'Fetching weather data...';
+                document.querySelector('.weather-temp').textContent = '--°C';
+
+                // Use a default location (e.g., New Delhi coordinates)
+                const defaultLat = 28.6139;
+                const defaultLon = 77.2090;
+
+                // Fetch weather data with retry mechanism
+                let retryCount = 0;
+                const maxRetries = 3;
+                let weatherData = null;
+
+                while (retryCount < maxRetries) {
+                    try {
+                        const response = await fetch(
+                            `https://api.openweathermap.org/data/2.5/weather?lat=${defaultLat}&lon=${defaultLon}&appid=${WEATHER_API_KEY}&units=metric`
+                        );
+
+                        if (!response.ok) {
+                            throw new Error(`Weather API error: ${response.status}`);
+                        }
+
+                        weatherData = await response.json();
+                        break;
+                    } catch (error) {
+                        retryCount++;
+                        if (retryCount === maxRetries) {
+                            throw error;
+                        }
+                        // Wait before retrying
+                        await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+                    }
+                }
+
+                if (!weatherData) {
+                    throw new Error('Failed to fetch weather data after multiple attempts');
+                }
+
+                updateWeatherUI(weatherData);
+            } catch (error) {
+                console.error('Weather error:', error);
+                const errorMessage = "Failed to fetch weather data. Please try again later.";
+                document.querySelector('.weather-desc').textContent = errorMessage;
+                document.querySelector('.weather-temp').textContent = '--°C';
+                speakResponse(errorMessage);
+            }
+        }
+
+        function updateWeatherUI(data) {
+            const weatherContainer = document.getElementById('weather-container');
+            if (!weatherContainer) return;
+
+            const temp = Math.round(data.main.temp);
+            const feelsLike = Math.round(data.main.feels_like);
+            const humidity = data.main.humidity;
+            const windSpeed = Math.round(data.wind.speed);
+            const description = data.weather[0].description;
+            const icon = getWeatherIcon(data.weather[0].main);
+
+            // Update weather display
+            document.querySelector('.weather-temp').textContent = `${temp}°C`;
+            document.querySelector('.weather-desc').textContent = description.charAt(0).toUpperCase() + description.slice(1);
+            document.querySelector('.weather-main i').className = `${icon} fa-2x`;
+
+            // Update weather details
+            document.querySelector('.weather-details').innerHTML = `
+                <div class="weather-detail-item">
+                    <div class="weather-detail-label">Humidity</div>
+                    <div class="weather-detail-value">${humidity}%</div>
+                </div>
+                <div class="weather-detail-item">
+                    <div class="weather-detail-label">Wind Speed</div>
+                    <div class="weather-detail-value">${windSpeed} km/h</div>
+                </div>
+                <div class="weather-detail-item">
+                    <div class="weather-detail-label">Feels Like</div>
+                    <div class="weather-detail-value">${feelsLike}°C</div>
+                </div>
+            `;
+
+            // Show weather container
+            weatherContainer.style.display = 'block';
+            weatherContainer.offsetHeight; // Trigger reflow
+            weatherContainer.classList.add('show');
+
+            // Provide voice feedback
+            const weatherMessage = `Current temperature is ${temp}°C, ${description}. Feels like ${feelsLike}°C with ${humidity}% humidity and ${windSpeed} kilometer per hour winds.`;
+            speakResponse(weatherMessage);
+            document.getElementById('output').textContent = weatherMessage;
+        }
+
+        // Update setupContinuousRecognition
+        async function setupContinuousRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                console.error("Speech recognition not supported");
+                return;
+            }
+
+            try {
+                // Request microphone permission
+                await navigator.mediaDevices.getUserMedia({ audio: true });
+
+                recognition = new SpeechRecognition();
+                recognition.continuous = true;
+                recognition.interimResults = false;
+                recognition.lang = 'en-US';
+
+                recognition.onstart = () => {
+                    isListening = true;
+                    document.querySelector('.voice-button i').style.color = '#4CAF50';
+                    console.log("Voice recognition started");
+                };
+
+                recognition.onend = () => {
+                    if (isListening) {
+                        // Restart if it was supposed to be listening
+                        recognition.start();
+                } else {
+                        document.querySelector('.voice-button i').style.color = '#2d2d2d';
+                    }
+                };
+
+                recognition.onerror = (event) => {
+                    console.error("Voice recognition error:", event.error);
+                    if (event.error === 'not-allowed') {
+                        showPermissionAlert('microphone');
+                    } else if (event.error === 'network') {
+                        // Restart recognition after network error
+                        setTimeout(() => {
+                            if (isListening) recognition.start();
+                        }, 1000);
+                    }
+                };
+
+                recognition.onresult = async (event) => {
+                    const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
+                    
+                    // Wake words for music control
+                    const musicWakeWords = [
+                        'hey veronica',
+                        'hi veronica',
+                        'hello veronica',
+                        'play music',
+                        'pause music',
+                        'stop music',
+                        'next song',
+                        'previous song',
+                        'volume up',
+                        'volume down'
+                    ];
+
+                    if (musicWakeWords.some(word => transcript.includes(word))) {
+                        handleUserCommand(transcript);
+                    }
+                };
+            } catch (error) {
+                console.error('Error setting up voice recognition:', error);
+                if (error.name === 'NotAllowedError') {
+                    showPermissionAlert('microphone');
+                }
+            }
+        }
+
+        function getWeatherIcon(condition) {
+            const icons = {
+                'Clear': 'fas fa-sun',
+                'Clouds': 'fas fa-cloud',
+                'Rain': 'fas fa-cloud-rain',
+                'Drizzle': 'fas fa-cloud-rain',
+                'Thunderstorm': 'fas fa-bolt',
+                'Snow': 'fas fa-snowflake',
+                'Mist': 'fas fa-smog',
+                'Smoke': 'fas fa-smog',
+                'Haze': 'fas fa-smog',
+                'Dust': 'fas fa-smog',
+                'Fog': 'fas fa-smog',
+                'Sand': 'fas fa-smog',
+                'Ash': 'fas fa-smog',
+                'Squall': 'fas fa-wind',
+                'Tornado': 'fas fa-wind'
+            };
+            return icons[condition] || 'fas fa-cloud-sun';
+        }
+
+        function toggleWeather(action = 'toggle') {
+            const weatherContainer = document.getElementById('weather-container');
+            if (action === 'open' || (action === 'toggle' && weatherContainer.style.display === 'none')) {
+                weatherContainer.style.display = 'block';
+                weatherContainer.offsetHeight; // Trigger reflow
+                weatherContainer.classList.add('show');
+            } else {
+                weatherContainer.classList.remove('show');
+                setTimeout(() => {
+                    weatherContainer.style.display = 'none';
+                }, 300);
+            }
+        }
+
+        // Music Player Variables
+        let youtubePlayer = null;
+        let pendingVideoId = null;
+        let pendingVideoTitle = null;
+        let currentPlaylist = [];
+        let currentPlayingIndex = -1;
+
+        // Load YouTube API
+        function loadYouTubeAPI() {
+            return new Promise((resolve, reject) => {
+                if (window.YT) {
+                    resolve();
+                    return;
+                }
+                
+                window.onYouTubeIframeAPIReady = function() {
+                    console.log('YouTube API Ready');
+                    resolve();
+                };
+
+                const tag = document.createElement('script');
+                tag.src = 'https://www.youtube.com/iframe_api';
+                const firstScriptTag = document.getElementsByTagName('script')[0];
+                firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+            });
+        }
+
+        // Call this when the page loads
+        loadYouTubeAPI();
+
+        async function createYouTubePlayer(videoId, title, autoplay = true) {
+            try {
+                await loadYouTubeAPI();
+
+                if (youtubePlayer) {
+                    youtubePlayer.loadVideoById({
+                        videoId: videoId,
+                        suggestedQuality: 'small'
+                    });
+                    if (!autoplay) youtubePlayer.pauseVideo();
+                    updateNowPlaying(title);
+                    return;
+                }
+
+                const playerConfig = {
+                    height: '1',  // Minimal height since we only need audio
+                    width: '1',   // Minimal width since we only need audio
+                    videoId: videoId,
+                    playerVars: {
+                        'playsinline': 1,
+                        'autoplay': autoplay ? 1 : 0,
+                        'controls': 0,     // Hide video controls
+                        'rel': 0,
+                        'modestbranding': 1,
+                        'fs': 0,           // Disable fullscreen
+                        'showinfo': 0,     // Hide video info
+                        'iv_load_policy': 3 // Hide video annotations
+                    },
+                    events: {
+                        'onReady': function(event) {
+                            if (autoplay) {
+                                event.target.playVideo();
+                                event.target.setVolume(100); // Set volume to maximum
+                            }
+                            updateNowPlaying(title);
+                            updatePlayerControls();
+                            // Hide the video element but keep audio
+                            const iframe = document.querySelector('#youtube-player iframe');
+                            if (iframe) {
+                                iframe.style.opacity = '0';
+                                iframe.style.pointerEvents = 'none';
+                            }
+                        },
+                        'onStateChange': onPlayerStateChange,
+                        'onError': onPlayerError
+                    }
+                };
+
+                youtubePlayer = new YT.Player('youtube-player', playerConfig);
+            } catch (error) {
+                console.error('Error creating YouTube player:', error);
+                showErrorMessage('Failed to initialize player. Please try again.');
+            }
+        }
+
+        function cleanSongTitle(title) {
+            // Remove text in parentheses and brackets
+            title = title.replace(/[\(\[].+?[\)\]]/g, '');
+            
+            // Remove common suffixes
+            const suffixes = [
+                'Official Video',
+                'Official Music Video',
+                'Official Lyric Video',
+                'Full Video',
+                'Full Song',
+                'Audio',
+                'Full Audio',
+                'Lyric Video',
+                'Music Video',
+                'Lyrics',
+                'HD',
+                '4K',
+                'HQ'
+            ];
+            
+            suffixes.forEach(suffix => {
+                title = title.replace(new RegExp(`\\s*${suffix}\\s*`, 'gi'), '');
+            });
+            
+            // Remove separators and what follows them
+            const separators = ['|', '-', ':', '•', '～', '~', 'ft.', 'feat.', 'featuring'];
+            separators.forEach(separator => {
+                const parts = title.split(new RegExp(`\\s*${separator}\\s*`, 'i'));
+                title = parts[0];
+            });
+            
+            // Trim whitespace and remove multiple spaces
+            return title.trim().replace(/\s+/g, ' ');
+        }
+
+        function updateNowPlaying(title) {
+            const cleanTitle = cleanSongTitle(title);
+            const nowPlaying = document.getElementById('current-song');
+            if (nowPlaying) {
+                nowPlaying.innerHTML = `
+                    <div style="display: flex; flex-direction: column; gap: 10px; padding: 15px; background: rgba(0, 0, 0, 0.3); border-radius: 10px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <div style="flex: 1; font-size: 16px; color: white;">Now Playing: ${cleanTitle}</div>
+                            <div class="player-controls" style="display: flex; gap: 15px;">
+                                <button onclick="previousSong()" style="background: none; border: none; color: #fff; cursor: pointer; font-size: 18px;" title="Previous Song">
+                                    <i class="fas fa-step-backward"></i>
+                                </button>
+                                <button onclick="togglePlayPause()" style="background: none; border: none; color: #fff; cursor: pointer; font-size: 18px;" title="Play/Pause">
+                                    <i class="fas fa-play" id="play-pause-icon"></i>
+                                </button>
+                                <button onclick="nextSong()" style="background: none; border: none; color: #fff; cursor: pointer; font-size: 18px;" title="Next Song">
+                                    <i class="fas fa-step-forward"></i>
+                                </button>
+                                <div class="volume-control" style="display: flex; align-items: center; gap: 10px;">
+                                    <button onclick="toggleMute()" style="background: none; border: none; color: #fff; cursor: pointer; font-size: 18px;" title="Mute/Unmute">
+                                        <i class="fas fa-volume-up" id="volume-icon"></i>
+                                    </button>
+                                    <input type="range" min="0" max="100" value="100" 
+                                           onchange="setVolume(this.value)"
+                                           style="width: 80px; cursor: pointer;">
+                                </div>
+                                <button onclick="showMusicCommands()" style="background: none; border: none; color: #fff; cursor: pointer; font-size: 18px;" title="Show Voice Commands">
+                                    <i class="fas fa-question-circle"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="progress-bar" style="background: rgba(255,255,255,0.1); height: 4px; border-radius: 2px; cursor: pointer;" onclick="seekTo(event)">
+                            <div id="progress" style="background: #4CAF50; height: 100%; width: 0%; border-radius: 2px; transition: width 0.1s linear;"></div>
+                        </div>
+                    </div>
+                `;
+            }
+            speakResponse("Playing " + cleanTitle);
+            document.getElementById('output').textContent = `Now Playing: ${cleanTitle}`;
+            updatePlayerControls();
+        }
+
+        function setVolume(value) {
+            if (youtubePlayer) {
+                youtubePlayer.setVolume(value);
+                const volumeIcon = document.getElementById('volume-icon');
+                if (value == 0) {
+                    volumeIcon.className = 'fas fa-volume-mute';
+                } else if (value < 50) {
+                    volumeIcon.className = 'fas fa-volume-down';
+                } else {
+                    volumeIcon.className = 'fas fa-volume-up';
+                }
+            }
+        }
+
+        function updatePlayerControls() {
+            if (!youtubePlayer) return;
+
+            const playPauseIcon = document.getElementById('play-pause-icon');
+            const volumeIcon = document.getElementById('volume-icon');
+
+            if (youtubePlayer.getPlayerState() === YT.PlayerState.PLAYING) {
+                playPauseIcon.className = 'fas fa-pause';
+            } else {
+                playPauseIcon.className = 'fas fa-play';
+            }
+
+            if (youtubePlayer.isMuted()) {
+                volumeIcon.className = 'fas fa-volume-mute';
+            } else {
+                volumeIcon.className = 'fas fa-volume-up';
+            }
+        }
+
+        function togglePlayPause() {
+            if (!youtubePlayer) return;
+
+            if (youtubePlayer.getPlayerState() === YT.PlayerState.PLAYING) {
+                youtubePlayer.pauseVideo();
+            } else {
+                youtubePlayer.playVideo();
+            }
+        }
+
+        function toggleMute() {
+            if (!youtubePlayer) return;
+
+            if (youtubePlayer.isMuted()) {
+                youtubePlayer.unMute();
+            } else {
+                youtubePlayer.mute();
+            }
+            updatePlayerControls();
+        }
+
+        function seekTo(event) {
+            if (!youtubePlayer) return;
+
+            const progressBar = event.currentTarget;
+            const clickPosition = (event.clientX - progressBar.getBoundingClientRect().left) / progressBar.offsetWidth;
+            const duration = youtubePlayer.getDuration();
+            youtubePlayer.seekTo(duration * clickPosition, true);
+        }
+
+        function updateProgressBar() {
+            if (!youtubePlayer || !document.getElementById('progress')) return;
+
+            const progress = (youtubePlayer.getCurrentTime() / youtubePlayer.getDuration()) * 100;
+            document.getElementById('progress').style.width = `${progress}%`;
+        }
+
+        function nextSong() {
+            if (currentPlaylist.length === 0) return;
+            
+            currentPlayingIndex = (currentPlayingIndex + 1) % currentPlaylist.length;
+            const nextVideo = currentPlaylist[currentPlayingIndex];
+            createYouTubePlayer(nextVideo.id, nextVideo.title);
+        }
+
+        function previousSong() {
+            if (currentPlaylist.length === 0) return;
+            
+            currentPlayingIndex = (currentPlayingIndex - 1 + currentPlaylist.length) % currentPlaylist.length;
+            const prevVideo = currentPlaylist[currentPlayingIndex];
+            createYouTubePlayer(prevVideo.id, prevVideo.title);
+        }
+
+        function onPlayerStateChange(event) {
+            updatePlayerControls();
+
+            if (event.data === YT.PlayerState.PLAYING) {
+                // Start progress bar updates
+                setInterval(updateProgressBar, 100);
+            } else if (event.data === YT.PlayerState.ENDED) {
+                nextSong();
+            }
+        }
+
+        function onPlayerError(event) {
+            console.error('Player error:', event);
+            const errorMessages = {
+                2: 'Invalid video ID',
+                5: 'HTML5 player error',
+                100: 'Video not found',
+                101: 'Embedding disabled by request. Click the YouTube icon to watch on YouTube.',
+                150: 'Embedding disabled by request. Click the YouTube icon to watch on YouTube.'
+            };
+            const errorMessage = errorMessages[event.data] || 'An error occurred while playing the video';
+            
+            showErrorMessage(errorMessage);
+            
+            if (event.data === 101 || event.data === 150) {
+                const videoId = youtubePlayer.getVideoData().video_id;
+                showYouTubeLink(videoId);
+            }
+
+            // Try playing next song if available
+            nextSong();
+        }
+
+        function showErrorMessage(message) {
+            document.getElementById('current-song').textContent = `Error: ${message}`;
+            speakResponse(`Sorry, there was an error playing this song. ${message}`);
+        }
+
+        function showYouTubeLink(videoId) {
+            document.getElementById('youtube-player').innerHTML = `
+                <div style="padding: 20px; text-align: center;">
+                    <p style="color: #9ca5b3; margin-bottom: 15px;">This video cannot be played here.</p>
+                    <a href="https://www.youtube.com/watch?v=${videoId}" 
+                       target="_blank" 
+                       style="display: inline-block; background: #4CAF50; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none;">
+                        <i class="fab fa-youtube"></i> Watch on YouTube
+                    </a>
+                </div>
+            `;
+        }
+
+        async function playMusic(songName) {
+            try {
+            const musicPlayer = document.getElementById('music-player');
+                
+                // Show loading state
+            musicPlayer.style.display = 'block';
+                musicPlayer.innerHTML = '<div style="color: white; text-align: center;">Searching for: ' + songName + '...</div>';
+                
+                // Search for music videos only
+                const searchResponse = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(songName + " song")}&type=video&videoCategoryId=10&videoEmbeddable=true&maxResults=10&key=${YOUTUBE_API_KEY}`);
+                
+                if (!searchResponse.ok) {
+                    throw new Error('Failed to search for the song');
+                }
+                
+                const searchData = await searchResponse.json();
+                
+                if (searchData.items && searchData.items.length > 0) {
+                    const videos = searchData.items;
+                    currentPlaylist = videos.map(video => ({
+                        id: video.id.videoId,
+                        title: video.snippet.title
+                    }));
+                    
+                    // Automatically play the first result
+                    const firstVideo = videos[0];
+                    currentPlayingIndex = 0;
+                    
+                    // Create player container
+                    musicPlayer.innerHTML = `
+                        <div style="background: #1a1a1a; padding: 15px; border-radius: 15px; margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <h3 style="color: white; margin: 0;">Music Player</h3>
+                                <div style="display: flex; gap: 10px;">
+                                    <button onclick="toggleMiniPlayer()" style="background: none; border: none; color: #9ca5b3; cursor: pointer;" title="Toggle mini player">
+                                        <i class="fas fa-compress"></i>
+                                    </button>
+                                    <button onclick="toggleRepeat()" style="background: none; border: none; color: #9ca5b3; cursor: pointer;" title="Toggle repeat">
+                                        <i class="fas fa-redo" id="repeat-icon"></i>
+                                    </button>
+                                    <button onclick="stopMusic()" style="background: none; border: none; color: #9ca5b3; cursor: pointer;" title="Close player">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="current-song" style="color: #9ca5b3; margin-bottom: 15px;"></div>
+                            <div id="player-container" class="full-size">
+                                <div id="youtube-player"></div>
+                            </div>
+                            <div style="margin-top: 15px; max-height: 200px; overflow-y: auto;">
+                                ${videos.map((video, index) => `
+                                    <div class="song-option" style="
+                                        padding: 10px;
+                                        margin: 5px 0;
+                                        background: rgba(255, 255, 255, 0.1);
+                                        border-radius: 5px;
+                                        cursor: pointer;
+                                        display: flex;
+                                        align-items: center;
+                                        gap: 10px;
+                                        ${index === 0 ? 'border: 1px solid #4CAF50;' : ''}"
+                                    >
+                                        <div style="display: flex; gap: 10px; flex: 1;" onclick="playSongFromList('${video.id.videoId}', '${video.snippet.title.replace(/'/g, "\\'")}', ${index})">
+                                            <i class="fas ${index === 0 ? 'fa-volume-up' : 'fa-play'}" style="color: #4CAF50;"></i>
+                                            <div style="flex: 1;">
+                                                <div style="color: white;">${video.snippet.title}</div>
+                                                <div style="color: #9ca5b3; font-size: 0.8em;">${video.snippet.channelTitle}</div>
+                                            </div>
+                                        </div>
+                                        <a href="https://www.youtube.com/watch?v=${video.id.videoId}" 
+                                           target="_blank" 
+                                           style="color: #4CAF50; text-decoration: none; padding: 5px 10px;"
+                                           title="Open in YouTube">
+                                            <i class="fab fa-youtube"></i>
+                                        </a>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+
+                    // Start playing the first video immediately
+                    createYouTubePlayer(firstVideo.id.videoId, firstVideo.snippet.title);
+                    
+                    speakResponse(`Playing "${firstVideo.snippet.title}"`);
+                    document.getElementById('output').textContent = `Playing "${firstVideo.snippet.title}"`;
+                } else {
+                    throw new Error('No results found');
+                }
+            } catch (error) {
+                console.error('Error playing music:', error);
+                const errorMessage = `Sorry, I couldn't play "${songName}". ${error.message}`;
+                musicPlayer.innerHTML = `
+                    <div style="background: #1a1a1a; padding: 15px; border-radius: 15px; margin-bottom: 20px;">
+                        <div style="color: white; text-align: center;">${errorMessage}</div>
+                        <div style="margin-top: 15px; text-align: center;">
+                            <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(songName)}" 
+                               target="_blank" 
+                               style="color: #4CAF50; text-decoration: none;">
+                                <i class="fab fa-youtube"></i> Search on YouTube
+                            </a>
+                        </div>
+                    </div>
+                `;
+                speakResponse(errorMessage);
+                document.getElementById('output').textContent = errorMessage;
+            }
+        }
+
+        window.playSongFromList = function(videoId, title, index) {
+            currentPlayingIndex = index;
+            createYouTubePlayer(videoId, title);
+        };
+
+        let isMinimized = false;
+        function toggleMiniPlayer() {
+            const container = document.getElementById('player-container');
+            const icon = document.querySelector('.fa-compress, .fa-expand');
+            isMinimized = !isMinimized;
+            
+            if (isMinimized) {
+                container.style.width = '320px';
+                container.style.height = '180px';
+                icon.classList.replace('fa-compress', 'fa-expand');
+            } else {
+                container.style.width = '100%';
+                container.style.height = '315px';
+                icon.classList.replace('fa-expand', 'fa-compress');
+            }
+        }
+
+        let isRepeatEnabled = false;
+        function toggleRepeat() {
+            isRepeatEnabled = !isRepeatEnabled;
+            const repeatIcon = document.getElementById('repeat-icon');
+            repeatIcon.style.color = isRepeatEnabled ? '#4CAF50' : '#9ca5b3';
+        }
+
+        function stopMusic() {
+            if (youtubePlayer) {
+                youtubePlayer.stopVideo();
+                youtubePlayer.destroy();
+                youtubePlayer = null;
+            }
+            currentPlaylist = [];
+            currentPlayingIndex = -1;
+            const musicPlayer = document.getElementById('music-player');
+            musicPlayer.innerHTML = '';
+            musicPlayer.style.display = 'none';
+            speakResponse("Music stopped");
+            document.getElementById('output').textContent = "Music stopped";
+        }
+
+        document.getElementById('input').addEventListener('keypress', async (e) => {
+            if (e.key === 'Enter') {
+                const prompt = e.target.value.toLowerCase();
+                e.target.value = '';
+                handleUserCommand(prompt);
+            }
+        });
+
+        document.getElementById('music-icon').addEventListener('click', () => {
+            const songName = prompt('What song would you like to play?');
+            if (songName) {
+                playMusic(songName);
+            }
+        });
+
+        // Add click handler for map icon
+        document.querySelector('.action-icon:nth-child(1)').addEventListener('click', toggleMap);
+
+        // Add click handler for weather icon
+        document.querySelector('.action-icon:nth-child(3)').addEventListener('click', getWeather);
+
+        function speakResponse(text) {
+            responsiveVoice.speak(
+                text,
+                "Hindi Female",
+                {
+                    rate: 1.0,
+                    pitch: 1,
+                    volume: 1
+                }
+            );
+        }
+
+        function triggerEmergency() {
+            if (confirm('Do you want to trigger emergency SOS?')) {
+                // Get current location
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition((position) => {
+                        const location = `https://www.google.com/maps?q=${position.coords.latitude},${position.coords.longitude}`;
+                        const message = `EMERGENCY: Rider needs assistance at location: ${location}`;
+                        document.getElementById('output').textContent = "Emergency services have been notified. Help is on the way.";
+                        speakResponse("Emergency services have been notified. Help is on the way. Stay calm.");
+                        // Here you would integrate with actual emergency services API
+                    });
+                }
+            }
+        }
+
+        function checkTraffic() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    // Simulate traffic data (replace with actual API integration)
+                    const trafficConditions = ['Light', 'Moderate', 'Heavy'];
+                    const randomCondition = trafficConditions[Math.floor(Math.random() * 3)];
+                    const averageSpeed = Math.floor(Math.random() * 40) + 20;
+                    const incidents = Math.floor(Math.random() * 3);
+
+                    document.querySelector('.traffic-condition').textContent = `Traffic Condition: ${randomCondition}`;
+                    document.querySelector('.traffic-details').innerHTML = `
+                        <div class="traffic-detail-item">
+                            <div class="traffic-detail-label">Road Status</div>
+                            <div class="traffic-detail-value">${randomCondition}</div>
+                        </div>
+                        <div class="traffic-detail-item">
+                            <div class="traffic-detail-label">Average Speed</div>
+                            <div class="traffic-detail-value">${averageSpeed} km/h</div>
+                        </div>
+                        <div class="traffic-detail-item">
+                            <div class="traffic-detail-label">Incidents</div>
+                            <div class="traffic-detail-value">${incidents}</div>
+                        </div>
+                    `;
+
+                    const message = `Traffic is ${randomCondition.toLowerCase()} in your area. Average speed is ${averageSpeed} kilometers per hour.`;
+                    speakResponse(message);
+                });
+            }
+        }
+
+        function toggleTraffic() {
+            const container = document.getElementById('traffic-container');
+            toggleContainer(container);
+            if (container.classList.contains('show')) {
+                checkTraffic();
+            }
+        }
+
+        function toggleContacts() {
+            const container = document.getElementById('contacts-container');
+            toggleContainer(container);
+        }
+
+        function toggleSystem() {
+            const container = document.getElementById('system-container');
+            toggleContainer(container);
+            if (container.classList.contains('show')) {
+                updateSystemStatus();
+            }
+        }
+
+        function toggleContainer(container) {
+            if (container.style.display === 'none' || !container.style.display) {
+                container.style.display = 'block';
+                container.offsetHeight; // Trigger reflow
+                container.classList.add('show');
+            } else {
+                container.classList.remove('show');
+                setTimeout(() => {
+                    container.style.display = 'none';
+                }, 300);
+            }
+        }
+
+        function addEmergencyContact() {
+            const name = prompt('Enter contact name:');
+            const number = prompt('Enter contact number:');
+            if (name && number) {
+                const contactsList = document.querySelector('.contacts-list');
+                const newContact = document.createElement('div');
+                newContact.className = 'contact-item';
+                newContact.innerHTML = `
+                    <i class="fas fa-user-shield"></i>
+                    <div class="contact-info">
+                        <div class="contact-name">${name}</div>
+                        <div class="contact-number">${number}</div>
+                    </div>
+                    <button class="contact-call" onclick="callEmergency('${number}')">
+                        <i class="fas fa-phone"></i>
+                    </button>
+                `;
+                contactsList.insertBefore(newContact, document.querySelector('.add-contact'));
+            }
+        }
+
+        function callEmergency(number) {
+            const message = `Initiating emergency call to ${number}`;
+            speakResponse(message);
+            document.getElementById('output').textContent = message;
+            // Here you would integrate with actual phone API
+        }
+
+        function updateSystemStatus() {
+            const systemChecks = {
+                gps: { status: false, message: '' },
+                network: { status: false, message: '' },
+                voice: { status: false, message: '' },
+                safety: { status: false, message: '' }
+            };
+
+            // GPS Status Check with detailed diagnostics
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const accuracy = position.coords.accuracy;
+                        let gpsQuality;
+                        if (accuracy <= 10) {
+                            gpsQuality = { status: 'Excellent', class: 'active' };
+                        } else if (accuracy <= 30) {
+                            gpsQuality = { status: 'Good', class: 'active' };
+                        } else if (accuracy <= 100) {
+                            gpsQuality = { status: 'Fair', class: 'warning' };
+                        } else {
+                            gpsQuality = { status: 'Poor', class: 'error' };
+                        }
+                        document.getElementById('gps-status').textContent = gpsQuality.status;
+                        document.getElementById('gps-status').className = `stat-value ${gpsQuality.class}`;
+                        systemChecks.gps = { status: true, message: `GPS Accuracy: ${Math.round(accuracy)}m` };
+                    },
+                    (error) => {
+                        let errorMessage;
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMessage = "Location access denied";
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMessage = "Location unavailable";
+                                break;
+                            case error.TIMEOUT:
+                                errorMessage = "Location request timeout";
+                                break;
+                            default:
+                                errorMessage = "Location error";
+                        }
+                        document.getElementById('gps-status').textContent = errorMessage;
+                        document.getElementById('gps-status').className = 'stat-value error';
+                        systemChecks.gps = { status: false, message: errorMessage };
+                    },
+                    { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+                );
+            }
+
+            // Network Status Check with connection quality
+            const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+            let networkQuality = { status: 'Unknown', class: '' };
+            
+            if (navigator.onLine) {
+                if (connection) {
+                    const effectiveType = connection.effectiveType || 'unknown';
+                    switch (effectiveType) {
+                        case '4g':
+                            networkQuality = { status: 'Excellent (4G)', class: 'active' };
+                            break;
+                        case '3g':
+                            networkQuality = { status: 'Good (3G)', class: 'active' };
+                            break;
+                        case '2g':
+                            networkQuality = { status: 'Fair (2G)', class: 'warning' };
+                            break;
+                        case 'slow-2g':
+                            networkQuality = { status: 'Poor', class: 'error' };
+                            break;
+                        default:
+                            networkQuality = { status: 'Connected', class: 'active' };
+                    }
+                } else {
+                    networkQuality = { status: 'Connected', class: 'active' };
+                }
+                systemChecks.network = { status: true, message: `Network Type: ${networkQuality.status}` };
+            } else {
+                networkQuality = { status: 'Offline', class: 'error' };
+                systemChecks.network = { status: false, message: 'No network connection' };
+            }
+            
+            document.getElementById('network-status').textContent = networkQuality.status;
+            document.getElementById('network-status').className = `stat-value ${networkQuality.class}`;
+
+            // Voice System Check
+            if (window.speechSynthesis && window.SpeechRecognition || window.webkitSpeechRecognition) {
+                document.querySelector('.system-stat-item:nth-child(4) .stat-value').textContent = 'Ready';
+                document.querySelector('.system-stat-item:nth-child(4) .stat-value').className = 'stat-value active';
+                systemChecks.voice = { status: true, message: 'Voice systems operational' };
+            } else {
+                document.querySelector('.system-stat-item:nth-child(4) .stat-value').textContent = 'Not Available';
+                document.querySelector('.system-stat-item:nth-child(4) .stat-value').className = 'stat-value error';
+                systemChecks.voice = { status: false, message: 'Voice systems not supported' };
+            }
+
+            // Safety System Check
+            const safetyChecks = checkSafetySystem();
+            document.querySelector('.system-stat-item:nth-child(1) .stat-value').textContent = safetyChecks.status;
+            document.querySelector('.system-stat-item:nth-child(1) .stat-value').className = `stat-value ${safetyChecks.class}`;
+            systemChecks.safety = { status: safetyChecks.operational, message: safetyChecks.message };
+
+            return systemChecks;
+        }
+
+        function checkSafetySystem() {
+            const checks = {
+                gps: navigator.geolocation !== undefined,
+                notifications: 'Notification' in window,
+                storage: typeof(Storage) !== "undefined",
+                online: navigator.onLine,
+                secure: window.isSecureContext
+            };
+
+            const operational = Object.values(checks).every(check => check);
+            let status, messageClass;
+
+            if (operational) {
+                status = 'Active';
+                messageClass = 'active';
+            } else {
+                const failedSystems = Object.entries(checks)
+                    .filter(([_, value]) => !value)
+                    .map(([key]) => key);
+                status = 'Degraded';
+                messageClass = 'warning';
+            }
+
+            return {
+                operational,
+                status,
+                class: messageClass,
+                message: `Safety System Status: ${status}`
+            };
+        }
+
+        function runDiagnostics() {
+            speakResponse("Running comprehensive system diagnostics. Please wait.");
+            document.getElementById('output').textContent = "Running system diagnostics...";
+            
+            const diagnosticsResults = [];
+            let completedChecks = 0;
+            const totalChecks = 4;
+
+            function updateDiagnosticsUI(result) {
+                diagnosticsResults.push(result);
+                completedChecks++;
+
+                if (completedChecks === totalChecks) {
+                    const failedChecks = diagnosticsResults.filter(check => !check.status);
+                    
+                    if (failedChecks.length === 0) {
+                        const message = "Diagnostics complete. All systems are functioning normally.";
+                        speakResponse(message);
+                        document.getElementById('output').textContent = message;
+                    } else {
+                        const issues = failedChecks.map(check => check.message).join(', ');
+                        const message = `Diagnostics complete. Issues found: ${issues}`;
+                        speakResponse(message);
+                        document.getElementById('output').textContent = message;
+                    }
+                }
+            }
+
+            // Run all system checks
+            const systemChecks = updateSystemStatus();
+            Object.entries(systemChecks).forEach(([system, status]) => {
+                updateDiagnosticsUI(status);
+            });
+
+            // Add error classes for visual feedback
+            document.querySelectorAll('.stat-value').forEach(el => {
+                if (el.classList.contains('error')) {
+                    el.closest('.system-stat-item').classList.add('error-state');
+                } else if (el.classList.contains('warning')) {
+                    el.closest('.system-stat-item').classList.add('warning-state');
+                }
+            });
+        }
+
+        // Add click handlers for the new icons
+        document.querySelector('.action-icon:nth-child(4)').addEventListener('click', toggleTraffic);
+        document.querySelector('.action-icon:nth-child(5)').addEventListener('click', toggleContacts);
+        document.querySelector('.action-icon:nth-child(6)').addEventListener('click', toggleSystem);
+
+        // Update system status periodically
+        setInterval(updateSystemStatus, 30000); // Every 30 seconds
+
+        // Profile menu functionality
+        function toggleProfileMenu() {
+            const menu = document.querySelector('.profile-menu');
+            if (!menu) {
+                const menuHTML = `
+                    <div class="profile-menu">
+                        <div class="profile-menu-item" onclick="editName()">
+                            <i class="fas fa-user-edit"></i>
+                            <span>Edit Profile</span>
+                        </div>
+                        <div class="profile-menu-item" onclick="toggleSettings()">
+                            <i class="fas fa-cog"></i>
+                            <span>Settings</span>
+                        </div>
+                        <div class="profile-menu-divider"></div>
+                        <div class="profile-menu-item" onclick="toggleNotifications()">
+                            <i class="fas fa-bell"></i>
+                            <span>Notifications</span>
+                        </div>
+                        <div class="profile-menu-item" onclick="togglePrivacy()">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Privacy</span>
+                        </div>
+                        <div class="profile-menu-divider"></div>
+                        <div class="profile-menu-item" onclick="logout()">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </div>
+                    </div>
+                `;
+                document.body.insertAdjacentHTML('beforeend', menuHTML);
+                menu = document.querySelector('.profile-menu');
+            }
+            menu.classList.toggle('show');
+        }
+
+        // Close profile menu when clicking outside
+        document.addEventListener('click', (e) => {
+            const menu = document.querySelector('.profile-menu');
+            const profileIcon = document.querySelector('.profile-icon');
+            if (menu && !menu.contains(e.target) && !profileIcon.contains(e.target)) {
+                menu.classList.remove('show');
+            }
+        });
+
+        // Profile menu functions
+        function toggleSettings() {
+            // Implement settings functionality
+            alert('Settings feature coming soon!');
+        }
+
+        function toggleNotifications() {
+            // Implement notifications settings
+            alert('Notifications settings coming soon!');
+        }
+
+        function togglePrivacy() {
+            // Implement privacy settings
+            alert('Privacy settings coming soon!');
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                // Implement logout functionality
+                window.location.reload();
+            }
+        }
+
+        // Update profile icon click handler
+        document.querySelector('.profile-icon').addEventListener('click', toggleProfileMenu);
+
+        // Initialize system status
+        window.addEventListener('load', () => {
+            checkStoredPermissions();
+            requestPermissions();
+            updateSystemStatus();
+            // Update system status every 300seconds
+            setInterval(updateSystemStatus, 300000);
+        });
+
+        // Device management states
+        let deviceStates = {
+            bluetooth: {
+                connected: false,
+                device: null,
+                battery: null,
+                lastUpdate: null
+            },
+            wifi: {
+                connected: false,
+                strength: 0,
+                type: null,
+                lastUpdate: null
+            },
+            gps: {
+                active: false,
+                accuracy: null,
+                lastUpdate: null,
+                coordinates: null
+            }
+        };
+
+        // Enhanced Bluetooth functionality
+        async function initializeBluetooth() {
+            if (!navigator.bluetooth) {
+                showDeviceAlert('bluetooth', 'Bluetooth is not supported on your device');
+                return;
+            }
+
+            try {
+                const device = await navigator.bluetooth.requestDevice({
+                    acceptAllDevices: true,
+                    optionalServices: ['battery_service', 'device_information', 'audio_control']
+                });
+
+                console.log('Device selected:', device.name);
+                
+                // Connect to the device
+                const server = await device.gatt.connect();
+                deviceStates.bluetooth.connected = true;
+                deviceStates.bluetooth.device = device;
+                deviceStates.bluetooth.lastUpdate = new Date();
+
+                // Try to get battery service
+                try {
+                    const batteryService = await server.getPrimaryService('battery_service');
+                    const batteryCharacteristic = await batteryService.getCharacteristic('battery_level');
+                    const batteryValue = await batteryCharacteristic.readValue();
+                    deviceStates.bluetooth.battery = batteryValue.getUint8(0);
+                } catch (error) {
+                    console.log('Battery service not available');
+                }
+
+                // Try to get audio control service
+                try {
+                    const audioService = await server.getPrimaryService('audio_control');
+                    // Add audio control functionality here
+                } catch (error) {
+                    console.log('Audio control service not available');
+                }
+
+                // Update UI and status
+                updateDeviceStatus();
+                speakResponse(`Connected to Bluetooth device: ${device.name}`);
+                document.getElementById('output').textContent = `Connected to Bluetooth device: ${device.name}`;
+
+                // Listen for disconnection
+                device.addEventListener('gattserverdisconnected', () => {
+                    deviceStates.bluetooth.connected = false;
+                    deviceStates.bluetooth.device = null;
+                    deviceStates.bluetooth.battery = null;
+                    deviceStates.bluetooth.lastUpdate = new Date();
+                    updateDeviceStatus();
+                    speakResponse('Bluetooth device disconnected');
+                    document.getElementById('output').textContent = 'Bluetooth device disconnected';
+                });
+
+            } catch (error) {
+                console.error('Bluetooth error:', error);
+                if (error.name === 'NotAllowedError') {
+                    showPermissionAlert('bluetooth');
+                } else {
+                    showDeviceAlert('bluetooth', 'Failed to connect to device');
+                }
+            }
+        }
+
+        // Enhanced WiFi monitoring
+        function monitorWiFi() {
+            if ('connection' in navigator) {
+                const connection = navigator.connection;
+                connection.addEventListener('change', () => {
+                    deviceStates.wifi.connected = navigator.onLine;
+                    deviceStates.wifi.strength = getWiFiStrength(connection);
+                    deviceStates.wifi.type = connection.effectiveType;
+                    deviceStates.wifi.lastUpdate = new Date();
+                    updateDeviceStatus();
+                });
+            }
+        }
+
+        function getWiFiStrength(connection) {
+            if (!connection) return 0;
+            
+            const types = {
+                'wifi': 100,
+                '4g': 90,
+                '3g': 70,
+                '2g': 50,
+                'slow-2g': 30
+            };
+            
+            return types[connection.effectiveType] || 0;
+        }
+
+        // Enhanced GPS monitoring
+        function monitorGPS() {
+            if (!navigator.geolocation) {
+                showDeviceAlert('gps', 'GPS is not supported on your device');
+                return;
+            }
+
+            const watchId = navigator.geolocation.watchPosition(
+                (position) => {
+                    deviceStates.gps.active = true;
+                    deviceStates.gps.accuracy = position.coords.accuracy;
+                    deviceStates.gps.coordinates = {
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude
+                    };
+                    deviceStates.gps.lastUpdate = new Date();
+                    updateDeviceStatus();
+                },
+                (error) => {
+                    deviceStates.gps.active = false;
+                    deviceStates.gps.accuracy = null;
+                    deviceStates.gps.coordinates = null;
+                    deviceStates.gps.lastUpdate = new Date();
+                    updateDeviceStatus();
+                    
+                    if (error.code === 1) {
+                        showPermissionAlert('location');
+                    } else {
+                        showDeviceAlert('gps', 'GPS signal lost');
+                    }
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
+                }
+            );
+
+            return watchId;
+        }
+
+        // Update device status display
+        function updateDeviceStatus() {
+            const systemStatus = document.querySelector('.system-status');
+            if (!systemStatus) return;
+
+            const statusHTML = `
+                <div class="system-status">
+                    <div class="status-icon ${deviceStates.bluetooth.connected ? 'active' : 'inactive'}" 
+                         title="${deviceStates.bluetooth.connected ? 
+                         `Connected to ${deviceStates.bluetooth.device?.name || 'device'}` : 
+                         'Bluetooth'}" 
+                         onclick="initializeBluetooth()">
+                        <i class="fas fa-bluetooth"></i>
+                        <span>BT</span>
+                        ${deviceStates.bluetooth.battery !== null ? 
+                        `<span class="battery-indicator">${deviceStates.bluetooth.battery}%</span>` : ''}
+                    </div>
+                    <div class="status-icon ${deviceStates.wifi.connected ? 'active' : 'inactive'}" 
+                         title="${deviceStates.wifi.connected ? 
+                         `WiFi Strength: ${deviceStates.wifi.strength}% (${deviceStates.wifi.type})` : 
+                         'WiFi Disconnected'}">
+                        <i class="fas fa-wifi"></i>
+                        <span>WiFi</span>
+                    </div>
+                    <div class="status-icon ${navigator.onLine ? 'active' : 'inactive'}" 
+                         title="${navigator.onLine ? 'Internet Connected' : 'Internet Disconnected'}">
+                        <i class="fas fa-globe"></i>
+                        <span>Net</span>
+                    </div>
+                    <div class="status-icon ${deviceStates.gps.active ? 'active' : 'inactive'}" 
+                         title="${deviceStates.gps.active ? 
+                         `GPS Accuracy: ${Math.round(deviceStates.gps.accuracy)}m` : 
+                         'GPS Inactive'}">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>GPS</span>
+                    </div>
+                </div>
+            `;
+
+            systemStatus.outerHTML = statusHTML;
+        }
+
+        function showDeviceAlert(type, message) {
+            const container = document.createElement('div');
+            container.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(0, 0, 0, 0.9);
+                padding: 20px;
+                border-radius: 10px;
+                color: white;
+                z-index: 1000;
+                max-width: 80%;
+                text-align: center;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            `;
+
+            container.innerHTML = `
+                <div style="margin-bottom: 15px;">
+                    <i class="fas fa-exclamation-triangle" style="color: #ffd700; font-size: 24px;"></i>
+                </div>
+                <div style="margin-bottom: 15px;">${message}</div>
+                <button onclick="this.parentElement.remove();" style="
+                    background: #4CAF50;
+                    border: none;
+                    color: white;
+                    padding: 10px 20px;
+                    border-radius: 5px;
+                    cursor: pointer;
+                ">OK</button>
+            `;
+
+            document.body.appendChild(container);
+        }
+
+        // Initialize device monitoring
+        window.addEventListener('load', () => {
+            checkStoredPermissions();
+            requestPermissions();
+            monitorWiFi();
+            const gpsWatchId = monitorGPS();
+            updateDeviceStatus();
+            
+            // Update status every 30 seconds
+            setInterval(updateDeviceStatus, 30000);
+            
+            // Cleanup on page unload
+            window.addEventListener('unload', () => {
+                if (gpsWatchId) {
+                    navigator.geolocation.clearWatch(gpsWatchId);
+                }
+                if (deviceStates.bluetooth.device?.gatt.connected) {
+                    deviceStates.bluetooth.device.gatt.disconnect();
+                }
+            });
+        });
+
+        async function handleUserCommand(command) {
+            const lowerCommand = command.toLowerCase();
+
+            // Check if the command is a question
+            const isQuestion = /^(what|how|why|when|where|who|which|can|could|would|should|do|does|is|are|was|were|will|has|have|had)/i.test(lowerCommand);
+            
+            if (isQuestion) {
+                try {
+                    const response = await getChatGPTResponse(command);
+                    speakResponse(response);
+                    document.getElementById('output').textContent = response;
+                    return;
+                } catch (error) {
+                    console.error('Error getting ChatGPT response:', error);
+                    const errorMessage = "I'm having trouble getting an answer to your question. Please try again.";
+                    speakResponse(errorMessage);
+                    document.getElementById('output').textContent = errorMessage;
+                    return;
+                }
+            }
+
+            // Weather commands
+            if (lowerCommand.includes('weather') || lowerCommand.includes('temperature')) {
+                try {
+                    await getWeather();
+                    return;
+                } catch (error) {
+                    console.error('Weather error:', error);
+                    const errorMessage = "I'm having trouble getting the weather information. Please try again.";
+                    speakResponse(errorMessage);
+                    document.getElementById('output').textContent = errorMessage;
+                    return;
+                }
+            }
+
+            // Traffic commands
+            if (lowerCommand.includes('traffic') || lowerCommand.includes('road condition')) {
+                try {
+                    toggleTraffic();
+                    checkTraffic();
+                    return;
+                } catch (error) {
+                    console.error('Traffic error:', error);
+                    const errorMessage = "I'm having trouble getting the traffic information. Please try again.";
+                    speakResponse(errorMessage);
+                    document.getElementById('output').textContent = errorMessage;
+                    return;
+                }
+            }
+
+            // Navigation commands
+            if (lowerCommand.includes('navigate') || lowerCommand.includes('route') || lowerCommand.includes('directions')) {
+                try {
+                    const destination = lowerCommand.match(/to\s+([^\.]+)/i)?.[1] || 
+                                     lowerCommand.match(/navigate\s+to\s+([^\.]+)/i)?.[1] ||
+                                     lowerCommand.match(/route\s+to\s+([^\.]+)/i)?.[1];
+                    
+                    if (destination) {
+                        toggleMap();
+                        // Here you would integrate with actual navigation API
+                        const message = `I'll help you navigate to ${destination}. Opening maps...`;
+                        speakResponse(message);
+                        document.getElementById('output').textContent = message;
+                    } else {
+                        const message = "Please specify your destination. For example, 'Navigate to Mumbai' or 'Route to Delhi'";
+                        speakResponse(message);
+                        document.getElementById('output').textContent = message;
+                    }
+                    return;
+                } catch (error) {
+                    console.error('Navigation error:', error);
+                    const errorMessage = "I'm having trouble setting up navigation. Please try again.";
+                    speakResponse(errorMessage);
+                    document.getElementById('output').textContent = errorMessage;
+                    return;
+                }
+            }
+
+            // Music control commands
+            if (lowerCommand.includes('play') || lowerCommand.includes('start music')) {
+                const songMatch = lowerCommand.match(/play\s+(.+)/i);
+                if (songMatch) {
+                    const songName = songMatch[1];
+                    playMusic(songName);
+                    return;
+                }
+            }
+
+            // Pause/Resume commands
+            if (lowerCommand.includes('pause') || lowerCommand.includes('stop music')) {
+                if (youtubePlayer && youtubePlayer.getPlayerState() === YT.PlayerState.PLAYING) {
+                    youtubePlayer.pauseVideo();
+                    speakResponse("Music paused");
+                    return;
+                }
+            }
+
+            if (lowerCommand.includes('resume') || lowerCommand.includes('continue')) {
+                if (youtubePlayer && youtubePlayer.getPlayerState() === YT.PlayerState.PAUSED) {
+                    youtubePlayer.playVideo();
+                    speakResponse("Resuming music");
+                    return;
+                }
+            }
+
+            // Volume control
+            if (lowerCommand.includes('volume')) {
+                if (lowerCommand.includes('up') || lowerCommand.includes('increase')) {
+                    if (youtubePlayer) {
+                        const currentVolume = youtubePlayer.getVolume();
+                        const newVolume = Math.min(100, currentVolume + 20);
+                        youtubePlayer.setVolume(newVolume);
+                        speakResponse(`Volume increased to ${newVolume}%`);
+                    }
+                    return;
+                }
+                if (lowerCommand.includes('down') || lowerCommand.includes('decrease')) {
+                    if (youtubePlayer) {
+                        const currentVolume = youtubePlayer.getVolume();
+                        const newVolume = Math.max(0, currentVolume - 20);
+                        youtubePlayer.setVolume(newVolume);
+                        speakResponse(`Volume decreased to ${newVolume}%`);
+                    }
+                    return;
+                }
+                if (lowerCommand.includes('mute')) {
+                    if (youtubePlayer) {
+                        youtubePlayer.mute();
+                        speakResponse("Music muted");
+                    }
+                    return;
+                }
+                if (lowerCommand.includes('unmute')) {
+                    if (youtubePlayer) {
+                        youtubePlayer.unMute();
+                        speakResponse("Music unmuted");
+                    }
+                    return;
+                }
+            }
+
+            // Next/Previous track
+            if (lowerCommand.includes('next') || lowerCommand.includes('skip')) {
+                nextSong();
+                speakResponse("Playing next song");
+                return;
+            }
+
+            if (lowerCommand.includes('previous') || lowerCommand.includes('back')) {
+                previousSong();
+                speakResponse("Playing previous song");
+                return;
+            }
+
+            // Stop music completely
+            if (lowerCommand.includes('stop playing') || lowerCommand.includes('turn off music')) {
+                stopMusic();
+                return;
+            }
+
+            // What's playing command
+            if (lowerCommand.includes("what's playing") || lowerCommand.includes('what song is this')) {
+                if (youtubePlayer && currentPlaylist[currentPlayingIndex]) {
+                    const currentSong = cleanSongTitle(currentPlaylist[currentPlayingIndex].title);
+                    speakResponse(`Currently playing ${currentSong}`);
+                } else {
+                    speakResponse("No song is currently playing");
+                }
+                return;
+            }
+
+            // Emergency commands
+            if (lowerCommand.includes('emergency') || lowerCommand.includes('sos') || lowerCommand.includes('help')) {
+                triggerEmergency();
+                return;
+            }
+
+            // System status commands
+            if (lowerCommand.includes('system status') || lowerCommand.includes('check system')) {
+                toggleSystem();
+                runDiagnostics();
+                return;
+            }
+
+            // Contacts commands
+            if (lowerCommand.includes('contacts') || lowerCommand.includes('emergency contacts')) {
+                toggleContacts();
+                return;
+            }
+
+            // If no specific command is matched, provide a helpful response
+            const helpMessage = "I'm not sure how to help with that. You can ask me about weather, traffic, navigation, music, or system status. For example, 'Hey Veronica, what's the weather?' or 'Hey Veronica, navigate to Mumbai'";
+            speakResponse(helpMessage);
+            document.getElementById('output').textContent = helpMessage;
+        }
+
+        // Add help function to show available voice commands
+        function showMusicCommands() {
+            const commands = `
+                Available Voice Commands for Music Control:
+                - "Play [song name]" - Play a specific song
+                - "Pause" or "Stop music" - Pause the current song
+                - "Resume" or "Continue" - Resume playing
+                - "Next" or "Skip" - Play next song
+                - "Previous" or "Back" - Play previous song
+                - "Volume up/down" - Adjust volume
+                - "Mute/Unmute" - Toggle mute
+                - "What's playing" - Show current song
+                - "Stop playing" - Stop music completely
+            `;
+            
+            document.getElementById('output').textContent = commands;
+            speakResponse("I've displayed the available music voice commands");
+        }
+
+        // Add wake word detection
+        const WAKE_WORDS = [
+            'hey veronica',
+            'hi veronica',
+            'hello veronica',
+            'veronica'
+        ];
+
+        let isProcessingCommand = false;
+
+        async function startContinuousListening() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                console.error("Speech recognition not supported");
+                return;
+            }
+
+            try {
+                // Request microphone permission first
+                await navigator.mediaDevices.getUserMedia({ audio: true });
+
+                recognition = new SpeechRecognition();
+                recognition.continuous = true;
+                recognition.interimResults = false;
+                recognition.lang = 'en-US';
+
+                recognition.onstart = () => {
+                    document.querySelector('.voice-button i').style.color = '#4CAF50';
+                    console.log('Continuous listening started');
+                };
+
+                recognition.onend = () => {
+                    if (!isProcessingCommand) {
+                        recognition.start(); // Restart recognition if it ends and not processing a command
+                    }
+                };
+
+                recognition.onerror = (event) => {
+                    console.error("Recognition error:", event.error);
+                    if (event.error === 'not-allowed') {
+                        showPermissionAlert('microphone');
+                    } else if (event.error !== 'aborted') {
+                        // Restart recognition on error unless manually aborted
+                        setTimeout(() => {
+                            if (!isProcessingCommand) {
+                                recognition.start();
+                            }
+                        }, 1000);
+                    }
+                };
+
+                recognition.onresult = async (event) => {
+                    const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
+                    
+                    // Check if wake word is detected
+                    if (WAKE_WORDS.some(word => transcript.includes(word))) {
+                        if (!isProcessingCommand) {
+                            isProcessingCommand = true;
+                            recognition.stop(); // Temporarily stop continuous recognition
+                            
+                            // Acknowledge wake word
+                            const response = "Yes, how can I help you?";
+                            speakResponse(response);
+                            document.getElementById('output').textContent = response;
+                            
+                            // Start listening for command
+                            setTimeout(() => {
+                                startCommandRecognition();
+                            }, 1000);
+                        }
+                    }
+                };
+
+                recognition.start();
+            } catch (error) {
+                console.error('Voice recognition error:', error);
+                if (error.name === 'NotAllowedError') {
+                    showPermissionAlert('microphone');
+                }
+            }
+        }
+
+        async function startCommandRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const commandRecognition = new SpeechRecognition();
+            commandRecognition.continuous = false;
+            commandRecognition.interimResults = false;
+            commandRecognition.lang = 'en-US';
+
+            commandRecognition.onstart = () => {
+                document.querySelector('.voice-button i').style.color = '#FFA500';
+                document.getElementById('output').textContent = "Listening for command...";
+            };
+
+            commandRecognition.onend = () => {
+                document.querySelector('.voice-button i').style.color = '#4CAF50';
+                isProcessingCommand = false;
+                startContinuousListening(); // Resume continuous listening
+            };
+
+            commandRecognition.onerror = (event) => {
+                console.error("Command recognition error:", event.error);
+                isProcessingCommand = false;
+                startContinuousListening(); // Resume continuous listening
+            };
+
+            commandRecognition.onresult = async (event) => {
+                const transcript = event.results[0][0].transcript.toLowerCase();
+                document.getElementById('input').value = transcript;
+                document.getElementById('output').textContent = `Command received: ${transcript}`;
+                
+                // Process the command
+                await handleUserCommand(transcript);
+            };
+
+            try {
+                commandRecognition.start();
+            } catch (error) {
+                console.error('Command recognition error:', error);
+                isProcessingCommand = false;
+                startContinuousListening(); // Resume continuous listening
+            }
+        }
+
+        // Update window load event listener
+        window.addEventListener('load', () => {
+            checkStoredPermissions();
+            requestPermissions();
+            updateSystemStatus();
+            greetUser();
+            // Start continuous listening after greeting
+            setTimeout(() => {
+                startContinuousListening();
+                speakResponse("Voice commands are now active. Say 'Hey Veronica' to start.");
+            }, 15000); // Start after greeting + 13 seconds
+            // Update system status every 300 seconds
+            setInterval(updateSystemStatus, 300000);
+        });
+
+        // Add status indicator to the UI
+        function updateNowPlaying(title) {
+            const cleanTitle = cleanSongTitle(title);
+            const nowPlaying = document.getElementById('current-song');
+            if (nowPlaying) {
+                nowPlaying.innerHTML = `
+                    <div style="display: flex; flex-direction: column; gap: 10px; padding: 15px; background: rgba(0, 0, 0, 0.3); border-radius: 10px;">
+                        <div class="status-indicator" style="text-align: right; font-size: 12px; color: #4CAF50;">
+                            <i class="fas fa-microphone"></i> Voice Commands Active
+                        </div>
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <div style="flex: 1; font-size: 16px; color: white;">Now Playing: ${cleanTitle}</div>
+                            <div class="player-controls" style="display: flex; gap: 15px;">
+                                <button onclick="previousSong()" style="background: none; border: none; color: #fff; cursor: pointer; font-size: 18px;" title="Previous Song">
+                                    <i class="fas fa-step-backward"></i>
+                                </button>
+                                <button onclick="togglePlayPause()" style="background: none; border: none; color: #fff; cursor: pointer; font-size: 18px;" title="Play/Pause">
+                                    <i class="fas fa-play" id="play-pause-icon"></i>
+                                </button>
+                                <button onclick="nextSong()" style="background: none; border: none; color: #fff; cursor: pointer; font-size: 18px;" title="Next Song">
+                                    <i class="fas fa-step-forward"></i>
+                                </button>
+                                <div class="volume-control" style="display: flex; align-items: center; gap: 10px;">
+                                    <button onclick="toggleMute()" style="background: none; border: none; color: #fff; cursor: pointer; font-size: 18px;" title="Mute/Unmute">
+                                        <i class="fas fa-volume-up" id="volume-icon"></i>
+                                    </button>
+                                    <input type="range" min="0" max="100" value="100" 
+                                           onchange="setVolume(this.value)"
+                                           style="width: 80px; cursor: pointer;">
+                                </div>
+                                <button onclick="showMusicCommands()" style="background: none; border: none; color: #fff; cursor: pointer; font-size: 18px;" title="Show Voice Commands">
+                                    <i class="fas fa-question-circle"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="progress-bar" style="background: rgba(255,255,255,0.1); height: 4px; border-radius: 2px; cursor: pointer;" onclick="seekTo(event)">
+                            <div id="progress" style="background: #4CAF50; height: 100%; width: 0%; border-radius: 2px; transition: width 0.1s linear;"></div>
+                        </div>
+                    </div>
+                `;
+            }
+            speakResponse("Playing " + cleanTitle);
+            document.getElementById('output').textContent = `Now Playing: ${cleanTitle}`;
+            updatePlayerControls();
+        }
+
+        // Apply saved wallpaper and theme on page load
+        function applySavedWallpaperAndTheme() {
+            const savedWallpaperData = localStorage.getItem('veronicaAppWallpaperData');
+            if (savedWallpaperData) {
+                try {
+                    const { url, theme } = JSON.parse(savedWallpaperData);
+                    // Apply wallpaper
+                    document.body.style.backgroundImage = `url('${url}')`;
+                    // Apply theme color
+                    document.documentElement.style.setProperty('--primary-color', theme);
+                } catch (error) {
+                    console.error('Error applying saved wallpaper:', error);
+                    // Fallback to default wallpaper
+                    document.body.style.backgroundImage = "url('https://wallpaperaccess.com/full/2267772.jpg')";
+                }
+            } else {
+                // Set default wallpaper if none is saved
+                document.body.style.backgroundImage = "url('https://wallpaperaccess.com/full/2267772.jpg')";
+            }
+        }
+
+        // Apply wallpaper and theme when the page loads
+        window.addEventListener('load', applySavedWallpaperAndTheme);
+
+        // Reapply wallpaper and theme when the page becomes visible (if it was in background)
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                applySavedWallpaperAndTheme();
+            }
+        });
+
+        // Twilio Configuration
+        const TWILIO_ACCOUNT_SID = 'ACd86a1b9e329cbce412f7ff5854305a23';
+        const TWILIO_AUTH_TOKEN = '0207e7345067a1812e5aba787e724426';
+        const TWILIO_PHONE_NUMBER = '+17622404285';
+        let twilioClient;
+
+        // Initialize Twilio client
+        function initializeTwilio() {
+            twilioClient = new Twilio.Device();
+            twilioClient.setup(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
+        }
+
+        // Function to send SMS
+        async function sendSMS(to, message) {
+            try {
+                const response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Basic ' + btoa(TWILIO_ACCOUNT_SID + ':' + TWILIO_AUTH_TOKEN),
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        'To': to,
+                        'From': TWILIO_PHONE_NUMBER,
+                        'Body': message
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to send SMS');
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error('Error sending SMS:', error);
+                throw error;
+            }
+        }
+
+        // Function to initiate a call
+        async function initiateCall(to) {
+            try {
+                // Create a TwiML response for the call
+                const twiml = `<?xml version="1.0" encoding="UTF-8"?>
+                    <Response>
+                        <Say voice="alice">This is an emergency call from Veronica. Please answer the call.</Say>
+                        <Pause length="1"/>
+                        <Say voice="alice">This is an emergency call from Veronica. Please answer the call.</Say>
+                        <Pause length="1"/>
+                        <Say voice="alice">This is an emergency call from Veronica. Please answer the call.</Say>
+                        <Pause length="1"/>
+                        <Say voice="alice">If you are unable to answer, please check your messages for location details.</Say>
+                    </Response>`;
+
+                // Create a temporary URL for the TwiML
+                const twimlUrl = URL.createObjectURL(new Blob([twiml], { type: 'text/xml' }));
+
+                const response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Calls.json`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Basic ' + btoa(TWILIO_ACCOUNT_SID + ':' + TWILIO_AUTH_TOKEN),
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        'To': to,
+                        'From': TWILIO_PHONE_NUMBER,
+                        'Url': twimlUrl,
+                        'StatusCallback': 'https://your-domain.com/call-status', // Replace with your domain
+                        'StatusCallbackEvent': ['initiated', 'ringing', 'answered', 'completed'],
+                        'StatusCallbackMethod': 'POST',
+                        'Timeout': '30',
+                        'MachineDetection': 'Enable',
+                        'MachineDetectionTimeout': '30',
+                        'MachineDetectionSilenceTimeout': '5'
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`Failed to initiate call: ${errorData.message || 'Unknown error'}`);
+                }
+
+                const callData = await response.json();
+                console.log('Call initiated:', callData);
+                
+                // Clean up the temporary URL
+                URL.revokeObjectURL(twimlUrl);
+                
+                return callData;
+            } catch (error) {
+                console.error('Error initiating call:', error);
+                throw error;
+            }
+        }
+
+        // Update the SOS function to use Twilio with better error handling
+        async function sendSOS() {
+            try {
+                const emergencyContacts = JSON.parse(localStorage.getItem('emergencyContacts') || '[]');
+                if (emergencyContacts.length === 0) {
+                    showError('No emergency contacts found. Please add contacts first.');
+                    return;
+                }
+
+                // Get current location
+                const position = await getCurrentLocation();
+                const locationMessage = `Emergency SOS from Veronica! Location: https://www.google.com/maps?q=${position.lat},${position.lng}`;
+
+                // Send SMS to all emergency contacts
+                for (const contact of emergencyContacts) {
+                    try {
+                        await sendSMS(contact.phone, locationMessage);
+                        showSuccess(`SOS sent to ${contact.name}`);
+                    } catch (error) {
+                        console.error(`Failed to send SMS to ${contact.name}:`, error);
+                        showError(`Failed to send SOS to ${contact.name}`);
+                    }
+                }
+
+                // Call the first emergency contact with retry mechanism
+                let retryCount = 0;
+                const maxRetries = 3;
+                let callSuccess = false;
+
+                while (retryCount < maxRetries && !callSuccess) {
+                    try {
+                        await initiateCall(emergencyContacts[0].phone);
+                        showSuccess(`Initiating call to ${emergencyContacts[0].name}`);
+                        callSuccess = true;
+                    } catch (error) {
+                        retryCount++;
+                        console.error(`Call attempt ${retryCount} failed:`, error);
+                        if (retryCount < maxRetries) {
+                            showError(`Call attempt ${retryCount} failed. Retrying...`);
+                            await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds before retry
+                        } else {
+                            showError('Failed to initiate emergency call after multiple attempts');
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error in sendSOS:', error);
+                showError('Failed to send SOS. Please try again.');
+            }
+        }
+
+        // Update the call function to use Twilio with better error handling
+        async function callContact(contact) {
+            try {
+                let retryCount = 0;
+                const maxRetries = 3;
+                let callSuccess = false;
+
+                while (retryCount < maxRetries && !callSuccess) {
+                    try {
+                        await initiateCall(contact.phone);
+                        showSuccess(`Initiating call to ${contact.name}`);
+                        callSuccess = true;
+                    } catch (error) {
+                        retryCount++;
+                        console.error(`Call attempt ${retryCount} failed:`, error);
+                        if (retryCount < maxRetries) {
+                            showError(`Call attempt ${retryCount} failed. Retrying...`);
+                            await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds before retry
+                        } else {
+                            showError('Failed to initiate call after multiple attempts');
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error calling contact:', error);
+                showError('Failed to initiate call. Please try again.');
+            }
+        }
+
+        // Initialize Twilio when the page loads
+        window.addEventListener('load', () => {
+            initializeTwilio();
+            applySavedWallpaperAndTheme();
+        });
+
+        // Enhanced Security Configuration
+        const SECURITY_CONFIG = {
+            maxLoginAttempts: 3,
+            sessionTimeout: 30 * 60 * 1000, // 30 minutes
+            locationUpdateInterval: 5000, // 5 seconds
+            emergencyResponseTimeout: 30000, // 30 seconds
+            maxEmergencyContacts: 5
+        };
+
+        // Enhanced Error Handling
+        class SecurityError extends Error {
+            constructor(message, code) {
+                super(message);
+                this.name = 'SecurityError';
+                this.code = code;
+            }
+        }
+
+        // Enhanced Monitoring System
+        const monitoringSystem = {
+            logs: [],
+            addLog: function(type, message, data = {}) {
+                const logEntry = {
+                    timestamp: new Date().toISOString(),
+                    type,
+                    message,
+                    data
+                };
+                this.logs.push(logEntry);
+                console.log(`[${type}] ${message}`, data);
+                
+                // Store logs in localStorage for persistence
+                localStorage.setItem('systemLogs', JSON.stringify(this.logs.slice(-100))); // Keep last 100 logs
+            }
+        };
+
+        // Enhanced Location Tracking
+        let locationWatchId = null;
+        let lastKnownLocation = null;
+        let locationHistory = [];
+
+        function startEnhancedLocationTracking() {
+            if (locationWatchId) {
+                navigator.geolocation.clearWatch(locationWatchId);
+            }
+
+            locationWatchId = navigator.geolocation.watchPosition(
+                (position) => {
+                    const location = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                        accuracy: position.coords.accuracy,
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    lastKnownLocation = location;
+                    locationHistory.push(location);
+                    
+                    // Keep only last 100 locations
+                    if (locationHistory.length > 100) {
+                        locationHistory = locationHistory.slice(-100);
+                    }
+                    
+                    // Store location history
+                    localStorage.setItem('locationHistory', JSON.stringify(locationHistory));
+                    
+                    monitoringSystem.addLog('location', 'Location updated', location);
+                },
+                (error) => {
+                    monitoringSystem.addLog('error', 'Location tracking error', { error: error.message });
+                    showError('Location tracking error: ' + error.message);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        }
+
+        // Enhanced SOS Functionality
+        async function sendEnhancedSOS() {
+            try {
+                const emergencyContacts = JSON.parse(localStorage.getItem('emergencyContacts') || '[]');
+                if (emergencyContacts.length === 0) {
+                    throw new SecurityError('No emergency contacts found', 'NO_CONTACTS');
+                }
+
+                // Get current location with fallback
+                let position;
+                try {
+                    position = await getCurrentLocation();
+                } catch (error) {
+                    position = lastKnownLocation || { lat: 0, lng: 0 };
+                    monitoringSystem.addLog('warning', 'Using last known location for SOS', { error: error.message });
+                }
+
+                const locationMessage = `Emergency SOS from Veronica! 
+Location: https://www.google.com/maps?q=${position.lat},${position.lng}
+Time: ${new Date().toLocaleString()}
+Accuracy: ${position.accuracy ? position.accuracy + ' meters' : 'Unknown'}`;
+
+                // Enhanced SMS sending with retry
+                for (const contact of emergencyContacts) {
+                    let smsSent = false;
+                    let retryCount = 0;
+                    
+                    while (!smsSent && retryCount < 3) {
+                        try {
+                            await sendSMS(contact.phone, locationMessage);
+                            smsSent = true;
+                            monitoringSystem.addLog('sms', `SOS SMS sent to ${contact.name}`);
+                            showSuccess(`SOS sent to ${contact.name}`);
+                        } catch (error) {
+                            retryCount++;
+                            monitoringSystem.addLog('error', `Failed to send SMS to ${contact.name}`, { 
+                                attempt: retryCount,
+                                error: error.message 
+                            });
+                            
+                            if (retryCount === 3) {
+                                showError(`Failed to send SOS to ${contact.name} after 3 attempts`);
+                            } else {
+                                await new Promise(resolve => setTimeout(resolve, 2000));
+                            }
+                        }
+                    }
+                }
+
+                // Enhanced calling with better TwiML
+                const twiml = `<?xml version="1.0" encoding="UTF-8"?>
+                    <Response>
+                        <Say voice="alice">Emergency alert from Veronica. This is an automated emergency call.</Say>
+                        <Pause length="1"/>
+                        <Say voice="alice">Please check your messages for location details.</Say>
+                        <Pause length="1"/>
+                        <Say voice="alice">This message will repeat.</Say>
+                        <Gather numDigits="1" action="/handle-key" method="POST">
+                            <Say voice="alice">Press 1 to confirm you received this message.</Say>
+                        </Gather>
+                    </Response>`;
+
+                // Call first emergency contact with enhanced configuration
+                try {
+                    await initiateCall(emergencyContacts[0].phone, twiml);
+                    monitoringSystem.addLog('call', `Emergency call initiated to ${emergencyContacts[0].name}`);
+                    showSuccess(`Initiating call to ${emergencyContacts[0].name}`);
+                } catch (error) {
+                    monitoringSystem.addLog('error', 'Failed to initiate emergency call', { error: error.message });
+                    showError('Failed to initiate emergency call');
+                }
+
+            } catch (error) {
+                monitoringSystem.addLog('error', 'SOS failed', { error: error.message });
+                showError('Failed to send SOS. Please try again.');
+            }
+        }
+
+        // Enhanced Session Management
+        function startSessionTimer() {
+            setInterval(() => {
+                const lastActivity = localStorage.getItem('lastActivity');
+                if (lastActivity) {
+                    const inactiveTime = Date.now() - parseInt(lastActivity);
+                    if (inactiveTime > SECURITY_CONFIG.sessionTimeout) {
+                        monitoringSystem.addLog('security', 'Session timeout');
+                        showError('Session expired. Please log in again.');
+                        window.location.href = 'login.html';
+                    }
+                }
+            }, 60000); // Check every minute
+        }
+
+        // Track user activity
+        document.addEventListener('click', () => {
+            localStorage.setItem('lastActivity', Date.now().toString());
+        });
+
+        // Initialize enhanced features
+        window.addEventListener('load', () => {
+            initializeTwilio();
+            startEnhancedLocationTracking();
+            startSessionTimer();
+            applySavedWallpaperAndTheme();
+            
+            // Load previous logs
+            const savedLogs = localStorage.getItem('systemLogs');
+            if (savedLogs) {
+                monitoringSystem.logs = JSON.parse(savedLogs);
+            }
+            
+            // Load location history
+            const savedLocations = localStorage.getItem('locationHistory');
+            if (savedLocations) {
+                locationHistory = JSON.parse(savedLocations);
+            }
+        });
+
+        // Enhanced error display
+        function showEnhancedError(message, details = '') {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.innerHTML = `
+                <div class="error-content">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>${message}</span>
+                    ${details ? `<div class="error-details">${details}</div>` : ''}
+                </div>
+                <button class="error-close" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            document.body.appendChild(errorDiv);
+            setTimeout(() => errorDiv.remove(), 5000);
+        }
+
+        // Add enhanced error styles
+        const style = document.createElement('style');
+        style.textContent = `
+            .error-message {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #ff4444;
+                color: white;
+                padding: 15px;
+                border-radius: 5px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                min-width: 300px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                z-index: 1000;
+            }
+            .error-content {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .error-details {
+                font-size: 0.8em;
+                margin-top: 5px;
+                opacity: 0.8;
+            }
+            .error-close {
+                background: none;
+                border: none;
+                color: white;
+                cursor: pointer;
+                padding: 5px;
+            }
+        `;
+        document.head.appendChild(style);
+
+        function getCurrentLocation(callback) {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        callback(position.coords.latitude, position.coords.longitude);
+                    },
+                    (error) => {
+                        console.error('Geolocation error:', error);
+                        callback(null, null);
+                    }
+                );
+            } else {
+                callback(null, null);
+            }
+        }
+
+        async function reverseGeocode(lat, lon) {
+            try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+                const data = await response.json();
+                return data.display_name || `${lat}, ${lon}`;
+            } catch (error) {
+                return `${lat}, ${lon}`;
+            }
+        }
+
+        async function updateAccidentDetails() {
+            getCurrentLocation(async (lat, lon) => {
+                let locationText = "Unknown";
+                if (lat && lon) {
+                    locationText = await reverseGeocode(lat, lon);
+                }
+                document.getElementById('accident-location').textContent = `Location: ${locationText}`;
+                document.getElementById('accident-time').textContent = `Time: ${new Date().toLocaleString()}`;
+                // For speed and impact force, you need to get these from your sensors or backend
+                // Example:
+                // document.getElementById('accident-speed').textContent = `Speed: ${speedValue} km/h`;
+                // document.getElementById('accident-impact').textContent = `Impact Force: ${impactValue} N`;
+            });
+        }
+
+        // Request location permission when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Request location permission
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        console.log("Location permission granted");
+                        // Store location in localStorage for cross-page access
+                        localStorage.setItem('userLatitude', position.coords.latitude);
+                        localStorage.setItem('userLongitude', position.coords.longitude);
+                        
+                        // Get place name using Google Maps Geocoding API
+                        getPlaceName(position.coords.latitude, position.coords.longitude);
+                    },
+                    error => {
+                        console.error("Location permission denied:", error.message);
+                        alert("Location access is needed for accurate accident detection. Please enable location services.");
+                    }
+                );
+            } else {
+                console.error("Geolocation not supported by this browser");
+                alert("Your browser doesn't support geolocation, which is required for accident detection.");
+            }
+        });
+        
+        // Function to get place name from coordinates using Google Maps Geocoding API
+        function getPlaceName(lat, lng) {
+            const geocoder = new google.maps.Geocoder();
+            const latlng = { lat: parseFloat(lat), lng: parseFloat(lng) };
+            
+            geocoder.geocode({ location: latlng }, (results, status) => {
+                if (status === "OK" && results[0]) {
+                    const address = results[0].formatted_address;
+                    localStorage.setItem('userAddress', address);
+                    console.log("Current location address:", address);
+                } else {
+                    console.error("Geocoder failed due to: " + status);
+                }
+            });
+        }
+
+        // Wake word and command mode voice recognition
+      
+        let isCommandMode = false;
+        let commandTimeout;
+
+        function startWakeWordListening() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert('Speech recognition not supported in this browser.');
+                return;
+            }
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+
+            recognition.onresult = function(event) {
+                const transcript = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
+                if (!isCommandMode && transcript.includes('hey veronica')) {
+                    isCommandMode = true;
+                    showListeningIndicator(true);
+                    speak('I am listening.');
+                    startCommandMode();
+                }
+            };
+            recognition.onerror = function(event) {
+                recognition.stop();
+                setTimeout(startWakeWordListening, 1000);
+            };
+            recognition.onend = function() {
+                if (!isCommandMode) setTimeout(startWakeWordListening, 500);
+            };
+            recognition.start();
+            showListeningIndicator(false);
+        }
+
+        function startCommandMode() {
+            recognition.stop();
+            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.continuous = true;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+
+            recognition.onresult = function(event) {
+                const transcript = event.results[event.results.length - 1][0].transcript.trim();
+                handleUserCommand(transcript); // Your command handler
+                resetCommandTimeout();
+            };
+            recognition.onerror = function(event) {
+                recognition.stop();
+                setTimeout(startCommandMode, 1000);
+            };
+            recognition.onend = function() {
+                if (isCommandMode) setTimeout(startCommandMode, 500);
+            };
+            recognition.start();
+            resetCommandTimeout();
+        }
+
+        function resetCommandTimeout() {
+            clearTimeout(commandTimeout);
+            // After 30 seconds of inactivity, go back to wake mode
+            commandTimeout = setTimeout(() => {
+                isCommandMode = false;
+                recognition.stop();
+                showListeningIndicator(false);
+                speak('Listening for Hey Veronica.');
+                startWakeWordListening();
+            }, 30000);
+        }
+
+        function showListeningIndicator(active) {
+            const indicator = document.getElementById('listening-indicator');
+            if (indicator) indicator.style.display = active ? 'block' : 'none';
+        }
+
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                const utter = new SpeechSynthesisUtterance(text);
+                window.speechSynthesis.speak(utter);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', startWakeWordListening);
+    </script>
+    <script src="https://code.responsivevoice.org/responsivevoice.js?key=xb2wgaxO"></script>
+    <!-- Google Maps API -->
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCCHQ1neszJqcpGyyffg8XiS3pGt84LGUw&callback=initMap"></script>
+    <script>
+        // Initialize empty map function to avoid errors since callback=initMap is specified
+        function initMap() {
+            console.log("Google Maps API loaded");
+        }
+    </script>
+    <script src="https://www.youtube.com/iframe_api"></script>
+</body>
+</html>

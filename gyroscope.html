@@ -1,0 +1,1936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accident Detection Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.css" rel="stylesheet">
+    <!-- Font Awesome for map icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { 
+            background-color: #f4f6f9; 
+            font-family: 'Arial', sans-serif;
+        }
+        .dashboard-card {
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+        .accident-alert {
+            background-color: #ffdddd;
+            border-color: #ff0000;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        .status-normal { color: green; }
+        .status-alert { color: red; font-weight: bold; }
+        .accident-details {
+            display: none;
+            background-color: #fff8f8;
+            border-left: 4px solid #ff0000;
+            padding: 15px;
+            margin-top: 10px;
+        }
+        .accident-data-row {
+            border-bottom: 1px solid #eee;
+            padding: 8px 0;
+        }
+        .data-label {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12 bg-primary text-white text-center py-3" id="page-title-container">
+                <h1 id="page-title">Accident Detection System</h1>
+            </div>
+        </div>
+        
+        <div class="container mt-4">
+            <div class="row">
+                <!-- Alert Status Card -->
+                <div class="col-md-4">
+                    <div class="card dashboard-card" id="alert-card">
+                        <div class="card-header bg-light">
+                            <h3 class="card-title text-center">System Status</h3>
+                        </div>
+                        <div class="card-body text-center">
+                            <h4 id="alert-status" class="status-normal">NORMAL</h4>
+                            <p id="alert-timestamp">-</p>
+                            
+                            <!-- Accident Details Section (Hidden by Default) -->
+                            <div id="accident-details" class="accident-details text-left">
+                                <h5 class="mb-3">Accident Details</h5>
+                                <div class="accident-data-row">
+                                    <span class="data-label">Location:</span>
+                                    <span id="accident-location">Unknown</span>
+                                </div>
+                                <div class="accident-data-row">
+                                    <span class="data-label">Time:</span>
+                                    <span id="accident-time">Unknown</span>
+                                </div>
+                                <div class="accident-data-row">
+                                    <span class="data-label">Speed:</span>
+                                    <span id="accident-speed">Unknown</span>
+                                </div>
+                                <div class="accident-data-row">
+                                    <span class="data-label">Impact Force:</span>
+                                    <span id="accident-force">Unknown</span>
+                                </div>
+                                <div class="mt-3">
+                                    <button id="emergency-contact-btn" class="btn btn-danger">Contact Emergency Services</button>
+                                </div>
+                                <div class="mt-3">
+                                    <button id="whatsapp-alert-btn" class="btn btn-success text-white" style="background-color: #25D366;">
+                                        <i class="fab fa-whatsapp me-1"></i> Send WhatsApp Alert
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Device Info Card -->
+                    <div class="card dashboard-card">
+                        <div class="card-header bg-light">
+                            <h3 class="card-title text-center">Device Information</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-6">
+                                    <strong>Battery:</strong>
+                                    <span id="battery-level">100%</span>
+                                </div>
+                                <div class="col-6">
+                                    <strong>Last Update:</strong>
+                                    <span id="last-update">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Live Location Section -->
+                    <div class="row my-3">
+                        <div class="col-md-12">
+                            <div class="card dashboard-card location-info">
+                                <div class="card-header bg-light">
+                                    <h3 class="card-title text-center">Live Location</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row text-center mb-2">
+                                        <div class="col-md-6">
+                                            <h5>Coordinates</h5>
+                                            <p id="location-coordinates" class="text-primary">Waiting for location...</p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h5>Address</h5>
+                                            <p id="location-address" class="text-primary">Waiting for location...</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Map Container -->
+                                    <div id="location-map-container" class="row mb-2">
+                                        <div class="col-md-12">
+                                            <div id="location-map" style="height: 200px; width: 100%; border-radius: 8px; position: relative;">
+                                                <div id="map-loading" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000;">
+                                                    <div class="spinner-border text-primary" role="status">
+                                                        <span class="visually-hidden">Loading map...</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Emergency Contacts Section -->
+                    <div class="row my-3">
+                        <div class="col-md-12">
+                            <div id="emergency-contacts-container">
+                                <!-- Emergency contacts UI will be dynamically created here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Accident History Section -->
+                    <div class="card dashboard-card">
+                        <div class="card-header bg-light">
+                            <h3 class="card-title text-center">Accident History</h3>
+                        </div>
+                        <div class="card-body">
+                            <ul id="accident-history-list" class="list-group">
+                                <li class="list-group-item text-center text-muted">No recent accidents</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Acceleration Chart -->
+                <div class="col-md-8">
+                    <div class="card dashboard-card">
+                        <div class="card-header bg-light">
+                            <h3 class="card-title text-center">Acceleration Data</h3>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="accelerationChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Sensor Data -->
+                    <div class="card dashboard-card">
+                        <div class="card-header bg-light">
+                            <h3 class="card-title text-center">Sensor Readings</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <h5>X Axis</h5>
+                                    <p id="x-accel" class="h4">0.00</p>
+                                    <small>m/s²</small>
+                                </div>
+                                <div class="col-4">
+                                    <h5>Y Axis</h5>
+                                    <p id="y-accel" class="h4">0.00</p>
+                                    <small>m/s²</small>
+                                </div>
+                                <div class="col-4">
+                                    <h5>Z Axis</h5>
+                                    <p id="z-accel" class="h4">0.00</p>
+                                    <small>m/s²</small>
+                                </div>
+                            </div>
+                            <div class="row text-center mt-4">
+                                <div class="col-4">
+                                    <h5>Speed</h5>
+                                    <p id="speed-value" class="h4">0.00</p>
+                                    <small>km/h</small>
+                                </div>
+                                <div class="col-4">
+                                    <h5>Pitch</h5>
+                                    <p id="pitch-value" class="h4">0.00</p>
+                                    <small>degrees</small>
+                                </div>
+                                <div class="col-4">
+                                    <h5>Roll</h5>
+                                    <p id="roll-value" class="h4">0.00</p>
+                                    <small>degrees</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase and Chart.js Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+    <!-- Add Font Awesome for better UI icons -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <!-- Add Bootstrap Toast plugin for notifications -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Firebase Configuration (REPLACE WITH YOUR CONFIG)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDoB5krBcbQOzcCMAAyCLYF71bKCnSyhG4",
+            authDomain: "real-time-accident-detection.firebaseapp.com",
+            databaseURL: "https://real-time-accident-detection-default-rtdb.firebaseio.com",
+            projectId: "real-time-accident-detection",
+            storageBucket: "real-time-accident-detection.firebasestorage.app",
+            messagingSenderId: "1023843919578",
+            appId: "1:1023843919578:web:02b65e3ca9d1a4919c67e3"
+        };
+        
+        // Threshold constants for accident detection
+        const ACCELERATION_THRESHOLD_HIGH = 2.5;  // g
+        const ACCELERATION_THRESHOLD_LOW = 0.5;   // g
+        const TILT_THRESHOLD = 45.0;             // degrees
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Initialize Firebase emergency contacts structure if it doesn't exist
+        function initializeFirebaseContacts() {
+            console.log("Checking if emergency contacts structure exists in Firebase...");
+            database.ref('emergency_contacts').once('value')
+                .then(snapshot => {
+                    if (!snapshot.exists()) {
+                        console.log("Emergency contacts not found in Firebase, initializing...");
+                        // Initialize with an empty array
+                        database.ref('emergency_contacts').set([])
+                            .then(() => {
+                                console.log("Successfully initialized emergency_contacts as an array in Firebase");
+                            })
+                            .catch(error => {
+                                console.error("Error initializing emergency contacts:", error);
+                            });
+                    } else {
+                        const data = snapshot.val();
+                        console.log("Emergency contacts already exist in Firebase:", data);
+                        
+                        // If not stored as an array, convert it
+                        if (data && !Array.isArray(data)) {
+                            console.log("Converting emergency contacts to array format...");
+                            const contactsArray = typeof data === 'object' ? Object.values(data) : [];
+                            database.ref('emergency_contacts').set(contactsArray)
+                                .then(() => {
+                                    console.log("Successfully converted emergency_contacts to array format");
+                                })
+                                .catch(error => {
+                                    console.error("Error converting emergency contacts to array:", error);
+                                });
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error("Error checking emergency contacts:", error);
+                });
+        }
+
+        // Call the initialize function once when the app starts
+        initializeFirebaseContacts();
+
+        // Acceleration Chart Setup
+        const ctx = document.getElementById('accelerationChart').getContext('2d');
+        const accelerationChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [
+                    {
+                        label: 'X Acceleration',
+                        data: [],
+                        borderColor: 'rgb(255, 99, 132)',
+                        tension: 0.1
+                    },
+                    {
+                        label: 'Y Acceleration',
+                        data: [],
+                        borderColor: 'rgb(54, 162, 235)',
+                        tension: 0.1
+                    },
+                    {
+                        label: 'Z Acceleration',
+                        data: [],
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: false
+                    }
+                }
+            }
+        });
+
+        // Update chart with new data point
+        function updateChart(x, y, z) {
+            const now = new Date().toLocaleTimeString();
+            
+            // Limit to last 20 data points
+            if (accelerationChart.data.labels.length > 20) {
+                accelerationChart.data.labels.shift();
+                accelerationChart.data.datasets[0].data.shift();
+                accelerationChart.data.datasets[1].data.shift();
+                accelerationChart.data.datasets[2].data.shift();
+            }
+            
+            accelerationChart.data.labels.push(now);
+            accelerationChart.data.datasets[0].data.push(x);
+            accelerationChart.data.datasets[1].data.push(y);
+            accelerationChart.data.datasets[2].data.push(z);
+            
+            accelerationChart.update();
+        }
+
+        // Update Sensor Data
+        function updateSensorData(snapshot) {
+            const data = snapshot.val();
+            if (!data) return;
+            
+            // Handle full sensor_data object structure
+            if (data.accelerometer) {
+                const x = parseFloat(data.accelerometer.x).toFixed(2);
+                const y = parseFloat(data.accelerometer.y).toFixed(2);
+                const z = parseFloat(data.accelerometer.z).toFixed(2);
+                
+                // Calculate total acceleration magnitude (in g)
+                const totalAcceleration = Math.sqrt(x*x + y*y + z*z).toFixed(2);
+                
+                // Update text displays
+                document.getElementById('x-accel').textContent = x;
+                document.getElementById('y-accel').textContent = y;
+                document.getElementById('z-accel').textContent = z;
+                
+                // Update chart
+                updateChart(x, y, z);
+                
+                // Get current speed from localStorage or from data
+                let currentSpeed = localStorage.getItem('userSpeed') || data.speed_kmph || "0.0";
+                currentSpeed = parseFloat(currentSpeed);
+                
+                // Update speed if not coming from real-time location updates
+                if (!watchPositionId) {
+                    document.getElementById('speed-value').textContent = currentSpeed.toFixed(1);
+                }
+                
+                if (data.orientation) {
+                    const pitch = parseFloat(data.orientation.pitch).toFixed(1);
+                    const roll = parseFloat(data.orientation.roll).toFixed(1);
+                    
+                    document.getElementById('pitch-value').textContent = pitch;
+                    document.getElementById('roll-value').textContent = roll;
+                    
+                    // Detect accident based on tilt
+                    if (Math.abs(pitch) > TILT_THRESHOLD || Math.abs(roll) > TILT_THRESHOLD) {
+                        console.log("Tilt-based accident detected!");
+                        updateAlertStatus({val: () => "ACCIDENT_DETECTED"});
+                        
+                        // Create accident data with enhanced location
+                        getCurrentLocation((location) => {
+                        const accidentData = {
+                            status: "ACCIDENT_DETECTED",
+                            timestamp: new Date().toLocaleString(),
+                                location: location ? {
+                                    lat: location.lat,
+                                    lon: location.lon,
+                                    address: location.address || "Address lookup in progress..."
+                                } : "Unknown",
+                            accelerometer: {
+                                x: x,
+                                y: y,
+                                z: z
+                            },
+                            speed_kmph: currentSpeed.toFixed(1),
+                            orientation: {
+                                pitch: pitch,
+                                roll: roll
+                            },
+                            detection_reason: "Excessive tilt detected"
+                        };
+                        
+                        // Update accident data
+                        database.ref('latest_accident').set(accidentData);
+                        });
+                    }
+                }
+                
+                // Detect accident based on acceleration magnitude
+                if (totalAcceleration > ACCELERATION_THRESHOLD_HIGH || totalAcceleration < ACCELERATION_THRESHOLD_LOW) {
+                    console.log("Acceleration-based accident detected!");
+                    updateAlertStatus({val: () => "ACCIDENT_DETECTED"});
+                    
+                    // Create accident data with enhanced location
+                    getCurrentLocation((location) => {
+                    const accidentData = {
+                        status: "ACCIDENT_DETECTED",
+                        timestamp: new Date().toLocaleString(),
+                            location: location ? {
+                                lat: location.lat,
+                                lon: location.lon,
+                                address: location.address || "Address lookup in progress..."
+                            } : "Unknown",
+                        accelerometer: {
+                            x: x,
+                            y: y,
+                            z: z
+                        },
+                        speed_kmph: currentSpeed.toFixed(1),
+                        orientation: data.orientation || {pitch: 0, roll: 0},
+                        detection_reason: "Abnormal acceleration detected"
+                    };
+                    
+                    // Update accident data
+                    database.ref('latest_accident').set(accidentData);
+                    });
+                }
+            } else if (data.x !== undefined) {
+                // Handle simple x, y, z format (for backward compatibility)
+                const x = parseFloat(data.x).toFixed(2);
+                const y = parseFloat(data.y).toFixed(2);
+                const z = parseFloat(data.z).toFixed(2);
+                
+                // Calculate total acceleration magnitude (in g)
+                const totalAcceleration = Math.sqrt(x*x + y*y + z*z).toFixed(2);
+
+                // Update text displays
+                document.getElementById('x-accel').textContent = x;
+                document.getElementById('y-accel').textContent = y;
+                document.getElementById('z-accel').textContent = z;
+
+                // Update chart
+                updateChart(x, y, z);
+                
+                // Detect accident based on acceleration magnitude
+                if (totalAcceleration > ACCELERATION_THRESHOLD_HIGH || totalAcceleration < ACCELERATION_THRESHOLD_LOW) {
+                    console.log("Acceleration-based accident detected (simple format)!");
+                    updateAlertStatus({val: () => "ACCIDENT_DETECTED"});
+                    
+                    // Create accident data with enhanced location
+                    getCurrentLocation((locationInfo) => {
+                    const accidentData = {
+                        status: "ACCIDENT_DETECTED",
+                        timestamp: new Date().toLocaleString(),
+                            location: locationInfo ? {
+                                lat: locationInfo.lat,
+                                lon: locationInfo.lon,
+                                address: locationInfo.address || "Address lookup in progress..."
+                            } : "Unknown",
+                        accelerometer: {
+                            x: x,
+                            y: y,
+                            z: z
+                        },
+                        speed_kmph: (data.speed_kmph !== undefined && data.speed_kmph !== null) ? parseFloat(data.speed_kmph).toFixed(1) : "0.0",
+                        orientation: data.orientation || { pitch: "0.0", roll: "0.0" },
+                        detection_reason: "Abnormal acceleration detected (simple format)"
+                    };
+                    
+                    // Update accident data
+                    database.ref('latest_accident').set(accidentData);
+                    });
+                }
+            }
+        }
+
+        // Calculate impact force from acceleration values
+        function calculateImpactForce(x, y, z) {
+            return Math.sqrt(x*x + y*y + z*z).toFixed(2);
+        }
+
+        // Update Accident Information
+        function updateAccidentData(snapshot) {
+            const accidentData = snapshot.val();
+            // Only proceed if it IS an accident.
+            if (!accidentData || accidentData.status !== "ACCIDENT_DETECTED") {
+                return;
+            }
+            
+            // Time
+                document.getElementById('accident-time').textContent = accidentData.timestamp || new Date().toLocaleString();
+                
+            // Location
+            const locationElement = document.getElementById('accident-location');
+                if (accidentData.location) {
+                if (typeof accidentData.location === 'string') {
+                    if (accidentData.location.toLowerCase() === "unknown") {
+                        locationElement.textContent = "Unknown";
+                    } else {
+                        const coordMatch = accidentData.location.match(/(-?\d+\.\d+),\s*(-?\d+\.\d+)/);
+                        if (coordMatch) { // Coordinates string like "lat, lon"
+                            const lat = parseFloat(coordMatch[1]);
+                            const lon = parseFloat(coordMatch[2]);
+                            locationElement.innerHTML = `
+                                <a href="https://www.google.com/maps/search/?api=1&query=${lat},${lon}" target="_blank" style="color: #dc3545; text-decoration: underline;">
+                                    ${accidentData.location} <i class="fas fa-map-marker-alt" style="font-size: 0.8em;"></i>
+                                </a>
+                            `;
+                        } else { // Treat as address
+                            const encodedLocation = encodeURIComponent(accidentData.location);
+                            locationElement.innerHTML = `
+                                <a href="https://www.google.com/maps/search/?api=1&query=${encodedLocation}" target="_blank" style="color: #dc3545; text-decoration: underline;">
+                                    ${accidentData.location} <i class="fas fa-map-marker-alt" style="font-size: 0.8em;"></i>
+                                </a>
+                            `;
+                        }
+                    }
+                } else if (accidentData.location.address) { // Location object with address
+                    const encodedAddress = encodeURIComponent(accidentData.location.address);
+                    locationElement.innerHTML = `
+                        <a href="https://www.google.com/maps/search/?api=1&query=${encodedAddress}" target="_blank" style="color: #dc3545; text-decoration: underline;">
+                            ${accidentData.location.address} <i class="fas fa-map-marker-alt" style="font-size: 0.8em;"></i>
+                        </a>
+                    `;
+                } else if (accidentData.location.lat && accidentData.location.lon) { // Location object with lat/lon
+                    const lat = parseFloat(accidentData.location.lat);
+                    const lon = parseFloat(accidentData.location.lon);
+                    if (!isNaN(lat) && !isNaN(lon)) {
+                        locationElement.innerHTML = `
+                            <a href="https://www.google.com/maps/search/?api=1&query=${lat},${lon}" target="_blank" style="color: #dc3545; text-decoration: underline;">
+                                ${lat.toFixed(6)}, ${lon.toFixed(6)} <i class="fas fa-map-marker-alt" style="font-size: 0.8em;"></i>
+                            </a>
+                        `;
+                    } else {
+                        locationElement.textContent = "Unknown";
+                    }
+                } else { // Fallback if location object is malformed
+                    locationElement.textContent = "Unknown";
+                }
+            } else { // If accidentData.location is null/undefined
+                locationElement.textContent = "Unknown";
+            }
+            
+            // Speed
+            const speedElement = document.getElementById('accident-speed');
+            if (accidentData.speed_kmph !== undefined && accidentData.speed_kmph !== null) {
+                let speedValStr = String(accidentData.speed_kmph).toLowerCase();
+                if (speedValStr === "unknown" || speedValStr === "n/a") {
+                    speedElement.textContent = "Unknown";
+                } else {
+                    let speedNum = parseFloat(accidentData.speed_kmph);
+                    if (!isNaN(speedNum)) {
+                        speedElement.textContent = speedNum.toFixed(1) + " km/h";
+                    } else {
+                        speedElement.textContent = "Unknown";
+                    }
+                }
+            } else {
+                speedElement.textContent = "Unknown";
+            }
+            
+            // Impact Force
+            const forceElement = document.getElementById('accident-force');
+            if (accidentData.accelerometer &&
+                accidentData.accelerometer.x !== undefined &&
+                accidentData.accelerometer.y !== undefined &&
+                accidentData.accelerometer.z !== undefined) {
+                
+                const xVal = parseFloat(accidentData.accelerometer.x);
+                const yVal = parseFloat(accidentData.accelerometer.y);
+                const zVal = parseFloat(accidentData.accelerometer.z);
+
+                if (!isNaN(xVal) && !isNaN(yVal) && !isNaN(zVal)) {
+                    const force = calculateImpactForce(xVal, yVal, zVal); 
+                    forceElement.textContent = force + " g";
+                } else {
+                    forceElement.textContent = "Unknown"; 
+                }
+            } else {
+                forceElement.textContent = "Unknown";
+            }
+            
+                document.getElementById('accident-details').style.display = "block";
+                updateAlertStatus({val: () => "ACCIDENT_DETECTED"});
+                addAccidentToHistory(accidentData);
+            
+            if (accidentData.location && typeof accidentData.location === 'object' && accidentData.location.lat && accidentData.location.lon) {
+                const lat = parseFloat(accidentData.location.lat);
+                const lon = parseFloat(accidentData.location.lon);
+                if (!isNaN(lat) && !isNaN(lon)) {
+                    updateLocationMap(lat, lon);
+                }
+            }
+
+            // Send WhatsApp alert if auto-alert is enabled
+            if (document.getElementById('auto-whatsapp-alert') && 
+                document.getElementById('auto-whatsapp-alert').checked) {
+                // Create a location string and link for the alert
+                let locationStr = "Unknown location";
+                let locationLink = "";
+                
+                if (accidentData.location) {
+                    if (typeof accidentData.location === 'object' && accidentData.location.lat && accidentData.location.lon) {
+                        const lat = parseFloat(accidentData.location.lat);
+                        const lon = parseFloat(accidentData.location.lon);
+                        locationStr = `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+                        locationLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
+                    } else if (accidentData.location.address) {
+                        locationStr = accidentData.location.address;
+                        locationLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationStr)}`;
+                    } else if (typeof accidentData.location === 'string' && accidentData.location !== "Unknown") {
+                        locationStr = accidentData.location;
+                        locationLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationStr)}`;
+                    }
+                }
+                
+                // Get the formatted values for speed and force
+                const speedValue = document.getElementById('accident-speed').textContent;
+                const forceValue = document.getElementById('accident-force').textContent;
+                
+                // Save accident alert to Firebase
+                const alertRecord = {
+                    timestamp: accidentData.timestamp || new Date().toISOString(),
+                    location: locationStr,
+                    location_link: locationLink,
+                    speed: speedValue,
+                    force: forceValue,
+                    status: "pending" // Track if alert was sent
+                };
+                
+                // Save the alert record first
+                database.ref('accident_alerts').push(alertRecord)
+                    .then(ref => {
+                        // Now send the WhatsApp alert
+                        sendWhatsAppAlert(
+                            locationStr,
+                            locationLink,
+                            speedValue,
+                            forceValue,
+                            accidentData.timestamp
+                        );
+                        
+                        // Update the alert record to mark as sent
+                        ref.child('status').set('sent');
+                    })
+                    .catch(error => {
+                        console.error("Error saving accident alert record:", error);
+                    });
+            }
+        }
+
+        // Add accident to history list with clickable location links
+        function addAccidentToHistory(accidentData) {
+            const historyList = document.getElementById('accident-history-list');
+            
+            // Clear "no accidents" message if present
+            if (historyList.querySelector('.text-muted')) {
+                historyList.innerHTML = '';
+            }
+            
+            // Limit list to 5 items
+            if (historyList.children.length >= 5) {
+                historyList.removeChild(historyList.lastChild);
+            }
+            
+            // Create new history item
+            const listItem = document.createElement('li');
+            listItem.className = 'list-group-item';
+            
+            const timestamp = accidentData.timestamp || new Date().toLocaleString();
+            
+            // Format location based on type with clickable link
+            let locationHTML = '<span style="color: #6c757d;">Unknown location</span>';
+            
+            if (accidentData.location) {
+                if (typeof accidentData.location === 'string') {
+                    // Try to extract coordinates from string format "lat, lon"
+                    const coordMatch = accidentData.location.match(/(-?\d+\.\d+),\s*(-?\d+\.\d+)/);
+                    if (coordMatch) {
+                        const lat = parseFloat(coordMatch[1]);
+                        const lon = parseFloat(coordMatch[2]);
+                        locationHTML = `
+                            <a href="https://www.google.com/maps/search/?api=1&query=${lat},${lon}" target="_blank" style="color: #0d6efd; text-decoration: underline;">
+                                ${accidentData.location} <i class="fas fa-map-marker-alt" style="font-size: 0.8em;"></i>
+                            </a>
+                        `;
+                    } else {
+                        // If it's not coordinates, try to use it as address
+                        const encodedLocation = encodeURIComponent(accidentData.location);
+                        locationHTML = `
+                            <a href="https://www.google.com/maps/search/?api=1&query=${encodedLocation}" target="_blank" style="color: #0d6efd; text-decoration: underline;">
+                                ${accidentData.location} <i class="fas fa-map-marker-alt" style="font-size: 0.8em;"></i>
+                            </a>
+                        `;
+                    }
+                } else if (accidentData.location.address) {
+                    const encodedAddress = encodeURIComponent(accidentData.location.address);
+                    locationHTML = `
+                        <a href="https://www.google.com/maps/search/?api=1&query=${encodedAddress}" target="_blank" style="color: #0d6efd; text-decoration: underline;">
+                            ${accidentData.location.address} <i class="fas fa-map-marker-alt" style="font-size: 0.8em;"></i>
+                        </a>
+                    `;
+                } else if (accidentData.location.lat && accidentData.location.lon) {
+                    const lat = accidentData.location.lat;
+                    const lon = accidentData.location.lon;
+                    locationHTML = `
+                        <a href="https://www.google.com/maps/search/?api=1&query=${lat},${lon}" target="_blank" style="color: #0d6efd; text-decoration: underline;">
+                            ${lat.toFixed(6)}, ${lon.toFixed(6)} <i class="fas fa-map-marker-alt" style="font-size: 0.8em;"></i>
+                        </a>
+                    `;
+                }
+            }
+            
+            listItem.innerHTML = `
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <small class="text-muted">${timestamp}</small>
+                        <div>${locationHTML}</div>
+                    </div>
+                    <span class="badge bg-danger">!</span>
+                </div>
+            `;
+            
+            // Add to top of list
+            historyList.insertBefore(listItem, historyList.firstChild);
+        }
+
+        // Update Alert Status
+        function updateAlertStatus(snapshot) {
+            const status = snapshot.val();
+            const alertStatusElement = document.getElementById('alert-status');
+            const alertCard = document.getElementById('alert-card');
+            const pageTitleContainer = document.getElementById('page-title-container');
+            const alertTimestamp = document.getElementById('alert-timestamp');
+
+            if (status === 'ACCIDENT_DETECTED') {
+                alertStatusElement.textContent = "ACCIDENT DETECTED";
+                alertStatusElement.classList.remove('status-normal');
+                alertStatusElement.classList.add('status-alert');
+                alertCard.classList.add('accident-alert');
+                pageTitleContainer.classList.remove('bg-primary');
+                pageTitleContainer.classList.add('bg-danger');
+                alertTimestamp.textContent = new Date().toLocaleString();
+                
+                // Show accident details
+                document.getElementById('accident-details').style.display = "block";
+                
+                // Optional: Add sound or additional alert mechanism
+                playAlertSound();
+            } else {
+                alertStatusElement.textContent = "NORMAL";
+                alertStatusElement.classList.remove('status-alert');
+                alertStatusElement.classList.add('status-normal');
+                alertCard.classList.remove('accident-alert');
+                pageTitleContainer.classList.remove('bg-danger');
+                pageTitleContainer.classList.add('bg-primary');
+                
+                // Hide accident details
+                document.getElementById('accident-details').style.display = "none";
+            }
+        }
+
+        // Play alert sound (with user interaction handling)
+        function playAlertSound() {
+            const alertSound = new Audio('https://www.soundjay.com/misc/sounds/bell-ring-05.mp3');
+            
+            // Check if we can autoplay
+            const playPromise = alertSound.play();
+            
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    // Auto-play was prevented - will require user interaction
+                    console.log("Audio autoplay prevented - requires user interaction");
+                    
+                    // Add a button for manual play if needed
+                    const alertCard = document.getElementById('alert-card');
+                    if (!document.getElementById('play-alert-sound')) {
+                        const soundButton = document.createElement('button');
+                        soundButton.id = 'play-alert-sound';
+                        soundButton.className = 'btn btn-sm btn-warning mt-2';
+                        soundButton.textContent = 'Play Alert Sound';
+                        soundButton.onclick = () => alertSound.play();
+                        alertCard.querySelector('.card-body').appendChild(soundButton);
+                    }
+                });
+            }
+        }
+
+        // Update Device Information
+        function updateDeviceInfo(snapshot) {
+            const deviceInfo = snapshot.val();
+            if (!deviceInfo) return;
+            
+            document.getElementById('battery-level').textContent = 
+                `${deviceInfo.battery_level || 100}%`;
+            document.getElementById('last-update').textContent = 
+                deviceInfo.last_update || new Date().toLocaleString();
+        }
+
+        // Emergency contact button event
+        document.getElementById('emergency-contact-btn').addEventListener('click', function() {
+            alert("Emergency services would be contacted in a real implementation");
+            // In a real implementation, this would trigger a call, SMS, or other notification
+        });
+
+        // Firebase Listeners with error handling
+        function setupFirebaseListeners() {
+            try {
+                // Add error handling to each database reference
+                const sensorDataRef = database.ref('sensor_data');
+                sensorDataRef.on('value', updateSensorData, (error) => {
+                    console.error("Error reading sensor data:", error);
+                });
+                
+                const alertsRef = database.ref('alerts/status');
+                alertsRef.on('value', updateAlertStatus, (error) => {
+                    console.error("Error reading alert status:", error);
+                });
+                
+                const deviceInfoRef = database.ref('device_info');
+                deviceInfoRef.on('value', updateDeviceInfo, (error) => {
+                    console.error("Error reading device info:", error);
+                });
+                
+                const accidentRef = database.ref('latest_accident');
+                accidentRef.on('value', updateAccidentData, (error) => {
+                    console.error("Error reading accident data:", error);
+                });
+                
+                // Initialize from the current accident data
+                accidentRef.once('value')
+                    .then(snapshot => {
+            const data = snapshot.val();
+            if (data && data.status === "ACCIDENT_DETECTED") {
+                updateAccidentData(snapshot);
+            }
+                    })
+                    .catch(error => {
+                        console.error("Error loading initial accident data:", error);
+                    });
+                
+                console.log("Firebase listeners set up successfully");
+            } catch (error) {
+                console.error("Error setting up Firebase listeners:", error);
+            }
+        }
+
+        // Start all listeners when Google Maps API is loaded
+        function onGoogleMapsLoaded() {
+            // Initial location setup
+            initMap();
+            
+            // Set up Firebase listeners
+            setupFirebaseListeners();
+            
+            console.log("Application fully initialized");
+        }
+
+        // Send SMS using Twilio
+        function sendTwilioSMS(messageBody) {
+    fetch("https://your-server.com/send-sms", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            to: "+919112631053",  // Emergency number
+            message: messageBody
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            console.log("SMS sent successfully:", data.sid);
+            alert("Emergency SMS sent.");
+        } else {
+            console.error("SMS failed:", data.error);
+        }
+    })
+    .catch(err => {
+        console.error("Fetch error:", err);
+            });
+        }
+
+        function getCurrentLocation(callback) {
+            // First try to get from localStorage (set by veronica.html)
+            const storedLat = localStorage.getItem('userLatitude');
+            const storedLng = localStorage.getItem('userLongitude');
+            const storedAddress = localStorage.getItem('userAddress');
+            
+            if (storedLat && storedLng) {
+                // Update the UI with stored values
+                updateLocationUI(storedLat, storedLng, storedAddress || 'Address lookup in progress...');
+                
+                // Use stored location for callback
+                callback({ lat: parseFloat(storedLat), lon: parseFloat(storedLng), address: storedAddress });
+                
+                // Still try to get fresh location data in the background
+            }
+            
+            // Always try to get current location data
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        
+                        // Store updated values
+                        localStorage.setItem('userLatitude', lat);
+                        localStorage.setItem('userLongitude', lon);
+                        
+                        // Get place name using Google Maps Geocoding API
+                        getPlaceName(lat, lon, (address) => {
+                            // Update UI
+                            updateLocationUI(lat, lon, address);
+                            
+                            // Call callback with full location data
+                            callback({ lat, lon, address });
+                        });
+                    },
+                    (error) => {
+                        console.error("Geolocation error:", error);
+                        
+                        // Still call callback with stored location or null
+                        if (storedLat && storedLng) {
+                            callback({ lat: parseFloat(storedLat), lon: parseFloat(storedLng), address: storedAddress });
+                        } else {
+                            callback(null);
+                        }
+                    }
+                );
+            } else {
+                console.error("Geolocation not supported");
+                
+                // Try to use stored location or null
+                if (storedLat && storedLng) {
+                    callback({ lat: parseFloat(storedLat), lon: parseFloat(storedLng), address: storedAddress });
+                } else {
+                    callback(null);
+                }
+            }
+        }
+        
+        // Update the location UI elements with a clickable Google Maps link
+        function updateLocationUI(lat, lon, address) {
+            // Update coordinates with clickable link
+            const coordinatesElement = document.getElementById('location-coordinates');
+            coordinatesElement.innerHTML = `
+                <a href="https://www.google.com/maps/search/?api=1&query=${lat},${lon}" target="_blank" style="color: #0d6efd; text-decoration: underline;">
+                    ${lat.toFixed(6)}, ${lon.toFixed(6)} <i class="fas fa-external-link-alt" style="font-size: 0.8em;"></i>
+                </a>
+            `;
+            
+            // Update address with clickable link if available
+            const addressElement = document.getElementById('location-address');
+            if (address && address !== 'Location address unavailable') {
+                // Format the address for a Google Maps search query
+                const encodedAddress = encodeURIComponent(address);
+                addressElement.innerHTML = `
+                    <a href="https://www.google.com/maps/search/?api=1&query=${encodedAddress}" target="_blank" style="color: #0d6efd; text-decoration: underline;">
+                        ${address} <i class="fas fa-external-link-alt" style="font-size: 0.8em;"></i>
+                    </a>
+                `;
+            } else {
+                addressElement.textContent = address || 'Address lookup in progress...';
+            }
+            
+            // Update the map
+            updateLocationMap(lat, lon);
+        }
+        
+        // Function to get place name from coordinates using Google Maps Geocoding API with retry
+        function getPlaceName(lat, lng, callback) {
+            console.log(`Getting place name for coordinates: ${lat}, ${lng}`);
+            
+            // First try to use Google Maps Geocoder
+            function tryGoogleGeocoder() {
+                try {
+                    const geocoder = new google.maps.Geocoder();
+                    const latlng = { lat: parseFloat(lat), lng: parseFloat(lng) };
+                    
+                    geocoder.geocode({ location: latlng }, (results, status) => {
+                        if (status === "OK" && results[0]) {
+                            const address = results[0].formatted_address;
+                            localStorage.setItem('userAddress', address);
+                            console.log("Current location address from Google Maps:", address);
+                            callback(address);
+                        } else {
+                            console.error("Google Geocoder failed due to:", status);
+                            // Fall back to Nominatim OpenStreetMap if Google fails
+                            tryNominatimGeocoder();
+                        }
+                    });
+                } catch (error) {
+                    console.error("Error using Google Geocoder:", error);
+                    // Fall back to Nominatim OpenStreetMap
+                    tryNominatimGeocoder();
+                }
+            }
+            
+            // Fallback to OpenStreetMap Nominatim API
+            function tryNominatimGeocoder() {
+                const apiUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`;
+                
+                fetch(apiUrl)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data && data.display_name) {
+                            const address = data.display_name;
+                            localStorage.setItem('userAddress', address);
+                            console.log("Current location address from OpenStreetMap:", address);
+                            callback(address);
+                        } else {
+                            console.error("No address found in OpenStreetMap response");
+                            callback("Location address unavailable");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error fetching from OpenStreetMap:", error);
+                        callback("Location address unavailable");
+                    });
+            }
+            
+            // Start with Google Geocoder
+            tryGoogleGeocoder();
+        }
+        
+        // Initialize and update the location map
+        let locationMap = null;
+        let locationMarker = null;
+        
+        function initMap() {
+            console.log("Google Maps API loaded");
+            
+            // Initialize the location map
+            const defaultLocation = { lat: 0, lng: 0 };
+            
+            locationMap = new google.maps.Map(document.getElementById("location-map"), {
+                zoom: 15,
+                center: defaultLocation,
+                mapTypeId: google.maps.MapTypeId.ROADMAP,
+                disableDefaultUI: true,
+                zoomControl: true,
+                styles: [{ featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] }]
+            });
+            
+            // Add action buttons to the location card
+            const locationCard = document.querySelector('.location-info');
+            const buttonRow = document.createElement('div');
+            buttonRow.className = 'text-center mt-3';
+            buttonRow.innerHTML = `
+                <button class="btn btn-sm btn-outline-primary me-2" onclick="getLocationImmediately()">
+                    <i class="fas fa-sync-alt"></i> Refresh Location
+                </button>
+                <button class="btn btn-sm btn-outline-info" onclick="lookupAddress()">
+                    <i class="fas fa-search-location"></i> Lookup Address
+                </button>
+            `;
+            locationCard.appendChild(buttonRow);
+            
+            // Always try to get location immediately and refresh addresses
+            getLocationImmediately();
+            
+            // Start continuous location tracking for speed calculation
+            startLocationAndSpeedTracking();
+            
+            // Start periodic location updates for address
+            startLocationUpdates();
+        }
+        
+        function updateLocationMap(lat, lng) {
+            if (!locationMap) return;
+            
+            const position = { lat: parseFloat(lat), lng: parseFloat(lng) };
+            
+            // Center the map on the location
+            locationMap.setCenter(position);
+            
+            // Create or update the marker
+            if (!locationMarker) {
+                locationMarker = new google.maps.Marker({
+                    position: position,
+                    map: locationMap,
+                    title: "Current Location",
+                    animation: google.maps.Animation.DROP
+                });
+            } else {
+                locationMarker.setPosition(position);
+            }
+            
+            // Hide loading indicator when map is updated
+            const mapLoading = document.getElementById('map-loading');
+            if (mapLoading) {
+                mapLoading.style.display = 'none';
+            }
+        }
+        
+        // Periodically update location
+        function startLocationUpdates() {
+            // Update location every 30 seconds
+            setInterval(() => {
+                getCurrentLocation((location) => {
+                    if (location) {
+                        console.log("Updated location data:", location);
+                    }
+                });
+            }, 30000);
+        }
+        
+        // Function to immediately attempt to get location
+        function getLocationImmediately() {
+            // Show loading state
+            document.getElementById('location-coordinates').textContent = 'Getting coordinates...';
+            document.getElementById('location-address').textContent = 'Locating...';
+            
+            // First try to use stored coordinates if available
+            const storedLat = localStorage.getItem('userLatitude');
+            const storedLng = localStorage.getItem('userLongitude');
+            
+            if (storedLat && storedLng) {
+                const lat = parseFloat(storedLat);
+                const lng = parseFloat(storedLng);
+                
+                // Update the UI with stored coordinates immediately
+                const coordinatesElement = document.getElementById('location-coordinates');
+                coordinatesElement.innerHTML = `
+                    <a href="https://www.google.com/maps/search/?api=1&query=${lat},${lng}" target="_blank" style="color: #0d6efd; text-decoration: underline;">
+                        ${lat.toFixed(6)}, ${lng.toFixed(6)} <i class="fas fa-external-link-alt" style="font-size: 0.8em;"></i>
+                    </a>
+                `;
+                
+                // Start address lookup for these coordinates
+                document.getElementById('location-address').textContent = 'Fetching address...';
+                
+                // Update the map with stored location
+                updateLocationMap(lat, lng);
+                
+                // Always try to get an address for stored coordinates
+                getPlaceName(lat, lng, (address) => {
+                    const addressElement = document.getElementById('location-address');
+                    if (address && address !== 'Location address unavailable') {
+                        const encodedAddress = encodeURIComponent(address);
+                        addressElement.innerHTML = `
+                            <a href="https://www.google.com/maps/search/?api=1&query=${encodedAddress}" target="_blank" style="color: #0d6efd; text-decoration: underline;">
+                                ${address} <i class="fas fa-external-link-alt" style="font-size: 0.8em;"></i>
+                            </a>
+                        `;
+                    } else {
+                        addressElement.textContent = 'Address lookup failed, please try again';
+                    }
+                });
+            }
+            
+            // Always try to get new location data regardless of stored data
+            if (navigator.geolocation) {
+                const locationOptions = {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                };
+                
+                try {
+                    navigator.geolocation.getCurrentPosition(
+                        // Success callback
+                        (position) => {
+                            console.log("Geolocation obtained successfully");
+                            const lat = position.coords.latitude;
+                            const lon = position.coords.longitude;
+                            
+                            // Store updated values
+                            localStorage.setItem('userLatitude', lat);
+                            localStorage.setItem('userLongitude', lon);
+                            
+                            // Update the UI immediately without waiting for address
+                            const coordinatesElement = document.getElementById('location-coordinates');
+                            coordinatesElement.innerHTML = `
+                                <a href="https://www.google.com/maps/search/?api=1&query=${lat},${lon}" target="_blank" style="color: #0d6efd; text-decoration: underline;">
+                                    ${lat.toFixed(6)}, ${lon.toFixed(6)} <i class="fas fa-external-link-alt" style="font-size: 0.8em;"></i>
+                                </a>
+                            `;
+                            
+                            document.getElementById('location-address').textContent = 'Fetching address...';
+                            
+                            // Update the map
+                            updateLocationMap(lat, lon);
+                            
+                            // Get address in the background
+                            getPlaceName(lat, lon, (address) => {
+                                const addressElement = document.getElementById('location-address');
+                                if (address && address !== 'Location address unavailable') {
+                                    const encodedAddress = encodeURIComponent(address);
+                                    addressElement.innerHTML = `
+                                        <a href="https://www.google.com/maps/search/?api=1&query=${encodedAddress}" target="_blank" style="color: #0d6efd; text-decoration: underline;">
+                                            ${address} <i class="fas fa-external-link-alt" style="font-size: 0.8em;"></i>
+                                        </a>
+                                    `;
+                                } else {
+                                    addressElement.textContent = 'Address lookup failed, please try again';
+                                }
+                            });
+                        },
+                        // Error callback
+                        (error) => {
+                            console.error("Geolocation error:", error);
+                            
+                            let errorMessage = "Location error: ";
+                            
+                            switch(error.code) {
+                                case error.PERMISSION_DENIED:
+                                    errorMessage += "Location access denied. Please enable location permissions.";
+                                    break;
+                                case error.POSITION_UNAVAILABLE:
+                                    errorMessage += "Location information unavailable. Please try again.";
+                                    break;
+                                case error.TIMEOUT:
+                                    errorMessage += "Location request timed out. Please try again.";
+                                    break;
+                                default:
+                                    errorMessage += "Unknown error occurred.";
+                            }
+                            
+                            // Only show error if we don't have stored coordinates
+                            if (!storedLat || !storedLng) {
+                                document.getElementById('location-coordinates').textContent = errorMessage;
+                                document.getElementById('location-address').textContent = 'Please enable location access';
+                            }
+                        },
+                        locationOptions
+                    );
+                } catch (error) {
+                    console.error("Exception during geolocation:", error);
+                    // Only show error if we don't have stored coordinates
+                    if (!storedLat || !storedLng) {
+                        document.getElementById('location-coordinates').textContent = 'Error: Exception during location access';
+                        document.getElementById('location-address').textContent = 'Please refresh the page and try again';
+                    }
+                }
+            } else {
+                console.error("Geolocation not supported");
+                // Only show error if we don't have stored coordinates
+                if (!storedLat || !storedLng) {
+                    document.getElementById('location-coordinates').textContent = 'Error: Geolocation not supported';
+                    document.getElementById('location-address').textContent = 'Please use a compatible browser';
+                }
+            }
+        }
+
+        // Function to manually trigger address lookup
+        function lookupAddress() {
+            const storedLat = localStorage.getItem('userLatitude');
+            const storedLng = localStorage.getItem('userLongitude');
+            
+            if (storedLat && storedLng) {
+                const lat = parseFloat(storedLat);
+                const lng = parseFloat(storedLng);
+                
+                // Show loading state
+                document.getElementById('location-address').textContent = 'Fetching address...';
+                
+                // Try to get address
+                getPlaceName(lat, lng, (address) => {
+                    const addressElement = document.getElementById('location-address');
+                    if (address && address !== 'Location address unavailable') {
+                        const encodedAddress = encodeURIComponent(address);
+                        addressElement.innerHTML = `
+                            <a href="https://www.google.com/maps/search/?api=1&query=${encodedAddress}" target="_blank" style="color: #0d6efd; text-decoration: underline;">
+                                ${address} <i class="fas fa-external-link-alt" style="font-size: 0.8em;"></i>
+                            </a>
+                        `;
+                    } else {
+                        addressElement.textContent = 'Address lookup failed, please try again';
+                    }
+                });
+            } else {
+                alert("No location coordinates available. Please get your location first.");
+            }
+        }
+
+        // Global variables for speed calculation
+        let lastPosition = null;
+        let lastPositionTime = null;
+        let currentSpeed = 0;
+        let watchPositionId = null;
+        let speedBuffer = [0, 0, 0, 0, 0]; // Buffer for smoothing speed values
+        let lastValidSpeed = 0;
+        const MAX_REASONABLE_SPEED = 180; // Maximum reasonable speed in km/h
+        const MIN_DISTANCE_THRESHOLD = 3; // Minimum distance in meters to consider for speed calculation
+        const MIN_TIME_THRESHOLD = 1; // Minimum time in seconds between measurements
+
+        // Function to start continuous location and speed tracking
+        function startLocationAndSpeedTracking() {
+            if (!navigator.geolocation) {
+                console.error("Geolocation is not supported by this browser");
+                return;
+            }
+
+            // Clear any existing watch
+            if (watchPositionId) {
+                navigator.geolocation.clearWatch(watchPositionId);
+            }
+
+            // Options for high accuracy and frequency
+            const options = {
+                enableHighAccuracy: true,
+                maximumAge: 1000, // Use cached position if newer than 1 second
+                timeout: 10000    // Longer timeout to get more accurate readings
+            };
+
+            // Start watching position with frequent updates
+            watchPositionId = navigator.geolocation.watchPosition(
+                updatePositionAndSpeed,
+                handlePositionError,
+                options
+            );
+
+            console.log("Started continuous location and speed tracking");
+        }
+
+        // Function to calculate and update speed based on position changes
+        function updatePositionAndSpeed(position) {
+            const currentTime = Date.now();
+            const currentPosition = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
+                accuracy: position.coords.accuracy // Track position accuracy
+            };
+
+            // Update location display
+            updateLocationUI(currentPosition.lat, currentPosition.lng, localStorage.getItem('userAddress'));
+
+            // Store position in localStorage for future reference
+            localStorage.setItem('userLatitude', currentPosition.lat);
+            localStorage.setItem('userLongitude', currentPosition.lng);
+
+            let newSpeed = 0;
+            let speedSource = "calculated";
+
+            // If the geolocation API directly provides speed and it's valid, use it
+            if (position.coords.speed !== null && position.coords.speed !== undefined) {
+                if (position.coords.speed >= 0) {
+                    // Convert m/s to km/h (multiply by 3.6)
+                    newSpeed = position.coords.speed * 3.6;
+                    speedSource = "device";
+                }
+            } 
+            // Otherwise, calculate based on position change if we have previous measurements
+            else if (lastPosition && lastPositionTime) {
+                // Calculate time difference in seconds
+                const timeDiff = (currentTime - lastPositionTime) / 1000;
+                
+                // Only calculate if we have a meaningful time difference
+                if (timeDiff >= MIN_TIME_THRESHOLD) {
+                    // Calculate distance between points in meters
+                    const distance = calculateDistance(
+                        lastPosition.lat, lastPosition.lng,
+                        currentPosition.lat, currentPosition.lng
+                    );
+                    
+                    // Only update speed if the distance is significant enough
+                    // This helps filter out GPS jitter
+                    if (distance >= MIN_DISTANCE_THRESHOLD) {
+                        // Calculate speed in m/s
+                        const speedMps = distance / timeDiff;
+                        // Convert to km/h
+                        newSpeed = speedMps * 3.6;
+                    }
+                    else {
+                        // For very small movements, assume we're stationary
+                        newSpeed = 0;
+                    }
+                }
+            }
+
+            // Apply sanity check to the speed value
+            if (newSpeed < 0 || newSpeed > MAX_REASONABLE_SPEED || isNaN(newSpeed)) {
+                // If the speed is unreasonable, use the last valid speed
+                // This helps filter out GPS spikes/errors
+                newSpeed = lastValidSpeed;
+                console.log(`Filtered out unreasonable speed reading: ${newSpeed} km/h`);
+            } else {
+                // If this is a valid reading, remember it for future filtering
+                lastValidSpeed = newSpeed;
+            }
+
+            // Add to smoothing buffer
+            speedBuffer.push(newSpeed);
+            speedBuffer.shift(); // Remove oldest reading
+
+            // Calculate smoothed speed (moving average)
+            const smoothedSpeed = speedBuffer.reduce((sum, value) => sum + value, 0) / speedBuffer.length;
+            
+            // Update current speed (rounded to 1 decimal place)
+            currentSpeed = Math.round(smoothedSpeed * 10) / 10;
+
+            // Apply additional stationary detection
+            // If speed is very low, just show 0
+            if (currentSpeed < 2) {
+                currentSpeed = 0;
+            }
+
+            // Log speed data for debugging
+            console.log(`Speed: ${currentSpeed.toFixed(1)} km/h (source: ${speedSource}, raw: ${newSpeed.toFixed(1)}, smoothed: ${smoothedSpeed.toFixed(1)})`);
+
+            // Store for next calculation
+            lastPosition = currentPosition;
+            lastPositionTime = currentTime;
+
+            // Update the speed in sensor data
+            const speedValueElement = document.getElementById('speed-value');
+            // Format to one decimal place
+            let displaySpeed = currentSpeed.toFixed(1);
+            speedValueElement.textContent = displaySpeed;
+
+            // Update speed with color-coding based on value
+            if (currentSpeed > 80) {
+                speedValueElement.style.color = '#dc3545'; // red for high speed
+            } else if (currentSpeed > 40) {
+                speedValueElement.style.color = '#fd7e14'; // orange for moderate speed
+            } else {
+                speedValueElement.style.color = '#28a745'; // green for low speed
+            }
+
+            // Also update in Firebase if needed
+            database.ref('sensor_data/speed_kmph').set(displaySpeed);
+            
+            // Update localStorage for cross-page communication
+            localStorage.setItem('userSpeed', displaySpeed);
+        }
+
+        // Handle errors from geolocation
+        function handlePositionError(error) {
+            console.error("Geolocation error:", error.message);
+            
+            // Display N/A as speed if we can't get position
+            document.getElementById('speed-value').textContent = "N/A";
+            
+            // Try to restart tracking if it was a temporary error
+            setTimeout(() => {
+                if (watchPositionId) {
+                    startLocationAndSpeedTracking();
+                }
+            }, 10000); // Try again after 10 seconds
+        }
+
+        // Calculate distance between two points using Haversine formula
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371e3; // Earth's radius in meters
+            const φ1 = lat1 * Math.PI / 180;
+            const φ2 = lat2 * Math.PI / 180;
+            const Δφ = (lat2 - lat1) * Math.PI / 180;
+            const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+            const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                    Math.cos(φ1) * Math.cos(φ2) *
+                    Math.sin(Δλ/2) * Math.sin(Δλ/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            const distance = R * c;
+
+            return distance; // in meters
+        }
+
+        // Function to get emergency contacts from Firebase
+        function getEmergencyContacts(callback) {
+            // Try to get contacts from Firebase first
+            database.ref('emergency_contacts').once('value')
+                .then(snapshot => {
+                    const data = snapshot.val();
+                    if (data) {
+                        // Convert Firebase object to array if needed
+                        if (Array.isArray(data)) {
+                            callback(data);
+                        } else {
+                            // If stored as object with keys
+                            const contactsArray = Object.values(data);
+                            callback(contactsArray);
+                        }
+                    } else {
+                        // Fallback to localStorage if not in Firebase
+                        const contactsStr = localStorage.getItem('emergencyContacts');
+                        const contacts = contactsStr ? JSON.parse(contactsStr) : [];
+                        
+                        // If contacts exist in localStorage but not in Firebase, save them to Firebase
+                        if (contacts.length > 0) {
+                            saveContactsToFirebase(contacts);
+                        } else {
+                            // Initialize empty array in Firebase if no contacts exist
+                            saveContactsToFirebase([]);
+                        }
+                        
+                        callback(contacts);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching emergency contacts from Firebase:", error);
+                    // Fallback to localStorage on error
+                    const contactsStr = localStorage.getItem('emergencyContacts');
+                    callback(contactsStr ? JSON.parse(contactsStr) : []);
+                });
+        }
+        
+        // Function to save contacts to Firebase
+        function saveContactsToFirebase(contacts) {
+            // Ensure contacts is an array
+            if (!Array.isArray(contacts)) {
+                console.error("Contacts must be an array");
+                return;
+            }
+            
+            // Save contacts as an array in Firebase
+            database.ref('emergency_contacts').set(contacts)
+                .then(() => {
+                    console.log("Emergency contacts saved to Firebase:", contacts);
+                    // Also update localStorage as backup
+                    localStorage.setItem('emergencyContacts', JSON.stringify(contacts));
+                })
+                .catch(error => {
+                    console.error("Error saving emergency contacts to Firebase:", error);
+                });
+        }
+
+        // Function to add an emergency contact
+        function addEmergencyContact() {
+            const contactInput = document.getElementById('emergency-contact-input');
+            const contact = contactInput.value.trim();
+            
+            if (!contact) {
+                alert("Please enter a contact number");
+                return false;
+            }
+            
+            // Validate phone number format
+            const phoneRegex = /^\+\d{10,15}$/;
+            if (!phoneRegex.test(contact)) {
+                alert("Please enter a valid phone number with country code (e.g., +911234567890)");
+                return false;
+            }
+            
+            getEmergencyContacts(contacts => {
+                // Ensure contacts is an array
+                if (!Array.isArray(contacts)) {
+                    contacts = [];
+                }
+                
+                // Check if contact already exists
+                if (contacts.includes(contact)) {
+                    alert("This contact already exists");
+                    return false;
+                }
+                
+                // Add the contact
+                contacts.push(contact);
+                
+                // Save to Firebase
+                saveContactsToFirebase(contacts);
+                
+                // Refresh the contacts list
+                displayEmergencyContacts();
+                contactInput.value = '';
+                
+                console.log("Contact added successfully:", contact);
+                console.log("Current contacts:", contacts);
+            });
+            
+            return true;
+        }
+
+        // Function to remove an emergency contact
+        function removeEmergencyContact(contact) {
+            getEmergencyContacts(contacts => {
+                // Filter out the contact to remove
+                const updatedContacts = contacts.filter(c => c !== contact);
+                
+                // Save to Firebase
+                saveContactsToFirebase(updatedContacts);
+                
+                // Refresh the contacts list
+                displayEmergencyContacts();
+            });
+        }
+
+        // Function to display emergency contacts
+        function displayEmergencyContacts() {
+            const contactsList = document.getElementById('emergency-contacts-list');
+            
+            // Show loading indicator
+            contactsList.innerHTML = '<div class="text-center"><div class="spinner-border spinner-border-sm text-primary" role="status"></div> Loading contacts...</div>';
+            
+            getEmergencyContacts(contacts => {
+                if (contacts.length === 0) {
+                    contactsList.innerHTML = '<div class="text-center text-muted">No emergency contacts added</div>';
+                    return;
+                }
+                
+                let html = '';
+                contacts.forEach(contact => {
+                    html += `
+                        <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                            <span>${contact}</span>
+                            <button class="btn btn-sm btn-outline-danger remove-contact" data-contact="${contact}">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    `;
+                });
+                
+                contactsList.innerHTML = html;
+                
+                // Add event listeners to remove buttons
+                document.querySelectorAll('.remove-contact').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const contact = this.getAttribute('data-contact');
+                        removeEmergencyContact(contact);
+                    });
+                });
+            });
+        }
+
+        // Function to send WhatsApp alert
+        function sendWhatsAppAlert(location, locationLink, speed, force, timestamp) {
+            getEmergencyContacts(contacts => {
+                if (contacts.length === 0) {
+                    console.log("No emergency contacts found for WhatsApp alert");
+                    alert("Please add emergency contacts first!");
+                    return;
+                }
+                
+                // Format the message
+                const message = `🚨 ACCIDENT ALERT 🚨\n\n` +
+                    `A potential accident has been detected!\n\n` +
+                    `🕒 Time: ${timestamp || new Date().toLocaleString()}\n` +
+                    `📍 Location: ${location}\n` +
+                    `🚗 Speed: ${speed}\n` +
+                    `💥 Impact Force: ${force}\n\n` +
+                    `📱 This is an automated alert from the Accident Detection System.\n` +
+                    `🔗 View on map: ${locationLink}`;
+                
+                // URI encode the message
+                const encodedMessage = encodeURIComponent(message);
+                
+                // Open WhatsApp for the first contact
+                const phoneNumber = contacts[0].replace('+', '').replace(/\s/g, '');
+                const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+                
+                // Open WhatsApp in a new tab
+                window.open(whatsappURL, '_blank');
+                
+                console.log(`WhatsApp alert sent to ${contacts[0]}`);
+                
+                // Record alert in Firebase
+                const alertData = {
+                    timestamp: new Date().toISOString(),
+                    contact: contacts[0],
+                    message: message,
+                    location: location,
+                    locationLink: locationLink,
+                    speed: speed,
+                    force: force
+                };
+                
+                database.ref('whatsapp_alerts').push(alertData)
+                    .then(() => console.log("WhatsApp alert recorded in Firebase"))
+                    .catch(error => console.error("Error recording WhatsApp alert:", error));
+            });
+        }
+
+        // Debug function to check Firebase structure
+        function checkFirebaseContacts() {
+            console.log("Checking Firebase emergency contacts structure...");
+            database.ref('emergency_contacts').once('value')
+                .then(snapshot => {
+                    const data = snapshot.val();
+                    console.log("Firebase contacts data:", data);
+                    console.log("Firebase contacts typeof:", typeof data);
+                    console.log("Firebase contacts isArray:", Array.isArray(data));
+                    
+                    if (data) {
+                        // Show in the debug section
+                        const debugElement = document.getElementById('firebase-debug');
+                        if (debugElement) {
+                            let debugHtml = '<h6>Firebase Structure:</h6>';
+                            debugHtml += '<pre class="bg-light p-2 small" style="max-height: 200px; overflow-y: auto;">';
+                            debugHtml += JSON.stringify(data, null, 2);
+                            debugHtml += '</pre>';
+                            debugElement.innerHTML = debugHtml;
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error("Error checking Firebase structure:", error);
+                });
+        }
+        
+        // Emergency Contacts UI Components
+        function createEmergencyContactsUI() {
+            const contactsContainer = document.getElementById('emergency-contacts-container');
+            if (!contactsContainer) return;
+            
+            contactsContainer.innerHTML = `
+                <div class="card dashboard-card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-phone-alt me-2"></i> Emergency Contacts
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info small" role="alert">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Add emergency contacts to receive WhatsApp alerts in case of accidents.
+                            Numbers must include country code (e.g., +911234567890).
+                        </div>
+                        
+                        <div class="input-group mb-3">
+                            <input type="text" id="emergency-contact-input" class="form-control" 
+                                placeholder="Enter phone with country code (+911234567890)" 
+                                aria-label="Emergency contact" pattern="\\+[0-9]{10,15}">
+                            <button class="btn btn-primary" type="button" id="add-contact-btn">
+                                <i class="fas fa-plus"></i> Add Number
+                            </button>
+                        </div>
+                        
+                        <div id="emergency-contacts-list" class="mb-3">
+                            <div class="text-center text-muted">
+                                <div class="spinner-border spinner-border-sm" role="status"></div>
+                                Loading contacts...
+                            </div>
+                        </div>
+                        
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="auto-whatsapp-alert" checked>
+                            <label class="form-check-label" for="auto-whatsapp-alert">
+                                Automatically send WhatsApp alert on accident detection
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="firebase-debug-container"></div>
+            `;
+            
+            // Move the debug container to the proper location
+            const debugContainer = document.getElementById('firebase-debug-container');
+            if (debugContainer) {
+                // Create debug section
+                debugContainer.innerHTML = `
+                    <div class="card dashboard-card mb-4">
+                        <div class="card-header bg-secondary text-white">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-database me-2"></i> Firebase Storage Debug
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex mb-2">
+                                <button id="check-firebase-btn" class="btn btn-sm btn-outline-secondary me-2">
+                                    <i class="fas fa-sync-alt"></i> Refresh Firebase Data
+                                </button>
+                                <button id="reset-firebase-btn" class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-trash-alt"></i> Reset All Contacts
+                                </button>
+                            </div>
+                            <div id="firebase-debug" class="small">
+                                <div class="alert alert-secondary">
+                                    Click "Refresh Firebase Data" to view the current contacts structure in Firebase.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Add event listeners after DOM elements are created
+            const addContactBtn = document.getElementById('add-contact-btn');
+            if (addContactBtn) {
+                addContactBtn.addEventListener('click', function() {
+                    addEmergencyContact();
+                    checkFirebaseContacts(); // Check Firebase structure after adding
+                });
+            }
+            
+            const contactInput = document.getElementById('emergency-contact-input');
+            if (contactInput) {
+                contactInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        addEmergencyContact();
+                        checkFirebaseContacts();
+                    }
+                });
+            }
+            
+            // Add event listeners for debug buttons
+            const checkFirebaseBtn = document.getElementById('check-firebase-btn');
+            if (checkFirebaseBtn) {
+                checkFirebaseBtn.addEventListener('click', checkFirebaseContacts);
+            }
+            
+            const resetFirebaseBtn = document.getElementById('reset-firebase-btn');
+            if (resetFirebaseBtn) {
+                resetFirebaseBtn.addEventListener('click', function() {
+                    if (confirm('Are you sure you want to reset all emergency contacts? This cannot be undone.')) {
+                        saveContactsToFirebase([]);
+                        alert('Emergency contacts reset!');
+                        displayEmergencyContacts();
+                        checkFirebaseContacts();
+                        
+                        // Show success notification
+                        showNotification('All contacts have been deleted', 'success');
+                    }
+                });
+            }
+            
+            // Display emergency contacts
+            displayEmergencyContacts();
+        }
+        
+        // Function to show toast notifications
+        function showNotification(message, type = 'info') {
+            const notificationId = 'notification-' + Date.now();
+            const notificationContainer = document.getElementById('notifications-container');
+            
+            if (!notificationContainer) {
+                // Create notifications container if it doesn't exist
+                const container = document.createElement('div');
+                container.id = 'notifications-container';
+                container.className = 'toast-container position-fixed top-0 end-0 p-3';
+                container.style.zIndex = '1080';
+                document.body.appendChild(container);
+            }
+            
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.id = notificationId;
+            toast.className = `toast align-items-center text-white bg-${type} border-0`;
+            toast.setAttribute('role', 'alert');
+            toast.setAttribute('aria-live', 'assertive');
+            toast.setAttribute('aria-atomic', 'true');
+            
+            // Toast content
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-circle' : 'info-circle'} me-2"></i>
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            `;
+            
+            // Add to container
+            document.getElementById('notifications-container').appendChild(toast);
+            
+            // Initialize and show the toast
+            const toastInstance = new bootstrap.Toast(toast, { delay: 3000 });
+            toastInstance.show();
+            
+            // Remove after hiding
+            toast.addEventListener('hidden.bs.toast', function () {
+                toast.remove();
+            });
+        }
+        
+        // Initialize event listeners on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create UI for emergency contacts
+            createEmergencyContactsUI();
+            
+            // Load emergency contacts from Firebase
+            database.ref('emergency_contacts').once('value')
+                .then(snapshot => {
+                    const data = snapshot.val();
+                    if (!data) {
+                        // If no data in Firebase, check localStorage and migrate if needed
+                        const localContacts = localStorage.getItem('emergencyContacts');
+                        if (localContacts) {
+                            const contacts = JSON.parse(localContacts);
+                            if (contacts && contacts.length > 0) {
+                                saveContactsToFirebase(contacts);
+                            }
+                        }
+                    }
+                    
+                    // Display contacts
+                    displayEmergencyContacts();
+                    
+                    // Check Firebase structure
+                    checkFirebaseContacts();
+                })
+                .catch(error => {
+                    console.error("Error loading emergency contacts from Firebase:", error);
+                    showNotification('Error loading contacts: ' + error.message, 'danger');
+                });
+        });
+
+    </script>
+    
+    <!-- Google Maps API for location services -->
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCCHQ1neszJqcpGyyffg8XiS3pGt84LGUw&callback=onGoogleMapsLoaded"></script>
+</body>
+</html>

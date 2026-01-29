@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Veronica - Navigation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="config.js"></script>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --error-color: #ff4444;
+            --success-color: #00C851;
+            --warning-color: #ffbb33;
+            --background-blur: 10px;
+            --container-opacity: 0.9;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            font-family: 'Arial', sans-serif;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: background-image 0.5s ease;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            backdrop-filter: blur(var(--background-blur)) brightness(0.7);
+            z-index: -1;
+            transition: backdrop-filter 0.3s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+            height: 100vh;
+        }
+
+        .sidebar {
+            background: rgba(45, 45, 45, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 40px 12px 15px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .route-info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            color: white;
+        }
+
+        .route-details {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .route-detail-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .route-detail-item i {
+            color: var(--primary-color);
+        }
+
+        .directions-list {
+            flex: 1;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .direction-step {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            color: white;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .direction-step.active {
+            background: rgba(76, 175, 80, 0.2);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .step-number {
+            background: var(--primary-color);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-distance {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 5px;
+        }
+
+        .map-container {
+            background: rgba(45, 45, 45, 0.9);
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .navigation-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            background: rgba(45, 45, 45, 0.9);
+            padding: 10px;
+            border-radius: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-button {
+            background: var(--primary-color);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-button:hover {
+            transform: scale(1.1);
+            background: #45a049;
+        }
+
+        .nav-button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .traffic-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(45, 45, 45, 0.9);
+            padding: 10px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .traffic-toggle:hover {
+            background: rgba(45, 45, 45, 1);
+        }
+
+        .traffic-toggle.active {
+            background: var(--primary-color);
+        }
+
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(45, 45, 45, 0.9);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: rgba(45, 45, 45, 1);
+            transform: translateX(-5px);
+        }
+
+        .suggestions-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(45, 45, 45, 0.95);
+            border-radius: 8px;
+            margin-top: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .suggestion-item {
+            padding: 10px 15px;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .suggestion-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                height: 300px;
+            }
+
+            .map-container {
+                height: calc(100vh - 340px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="search-box">
+                <input type="text" class="search-input" id="destination-input" placeholder="Enter destination">
+                <i class="fas fa-search search-icon"></i>
+                <div class="suggestions-list" id="suggestions"></div>
+            </div>
+            <div class="route-info">
+                <div class="route-details">
+                    <div class="route-detail-item">
+                        <i class="fas fa-route"></i>
+                        <span id="route-distance">-- km</span>
+                    </div>
+                    <div class="route-detail-item">
+                        <i class="fas fa-clock"></i>
+                        <span id="route-duration">-- min</span>
+                    </div>
+                    <div class="route-detail-item">
+                        <i class="fas fa-traffic-light"></i>
+                        <span id="route-traffic">Checking traffic...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="directions-list" id="directions-list">
+                <!-- Directions will be populated here -->
+            </div>
+        </div>
+        <div class="map-container">
+            <div id="map"></div>
+            <button class="back-button" onclick="window.location.href='veronica.html'">
+                <i class="fas fa-arrow-left"></i>
+                Back to Veronica
+            </button>
+            <div class="traffic-toggle" id="traffic-toggle">
+                <i class="fas fa-traffic-light"></i>
+                <span>Traffic</span>
+            </div>
+            <div class="navigation-controls">
+                <button class="nav-button" id="zoom-in">
+                    <i class="fas fa-plus"></i>
+                </button>
+                <button class="nav-button" id="zoom-out">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <button class="nav-button" id="recenter">
+                    <i class="fas fa-crosshairs"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let map;
+        let directionsService;
+        let directionsRenderer;
+        let trafficLayer;
+        let userMarker;
+        let locationWatchId;
+        let currentPosition = null;
+        let destinationPlace = null;
+        let autocompleteService;
+        let placesService;
+        let navigationActive = false;
+        let currentRoute = null;
+        let currentStepIndex = 0;
+
+        // Debug logging utility
+        const debugLog = {
+            enabled: true,
+            log: function(message, data) {
+                if (this.enabled) {
+                    console.log(`[DEBUG] ${message}`, data || '');
+                }
+            },
+            error: function(message, error) {
+                console.error(`[ERROR] ${message}`, error || '');
+            }
+        };
+
+        function initMap() {
+            debugLog.log('Initializing map...');
+            try {
+                // Default location (center of India)
+                const defaultLocation = { lat: 20.5937, lng: 78.9629 };
+
+                map = new google.maps.Map(document.getElementById('map'), {
+                    zoom: 5,
+                    center: defaultLocation,
+                    mapTypeId: google.maps.MapTypeId.ROADMAP,
+                    mapTypeControl: true,
+                    mapTypeControlOptions: {
+                        style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
+                        position: google.maps.ControlPosition.TOP_RIGHT
+                    },
+                    zoomControl: true,
+                    zoomControlOptions: {
+                        position: google.maps.ControlPosition.RIGHT_CENTER
+                    },
+                    scaleControl: true,
+                    streetViewControl: true,
+                    fullscreenControl: true
+                });
+
+                debugLog.log('Map created successfully');
+
+                directionsService = new google.maps.DirectionsService();
+                directionsRenderer = new google.maps.DirectionsRenderer({
+                    map: map,
+                    suppressMarkers: true,
+                    polylineOptions: {
+                        strokeColor: '#4CAF50',
+                        strokeWeight: 5
+                    }
+                });
+
+                // Initialize traffic layer and enable by default
+                trafficLayer = new google.maps.TrafficLayer();
+                trafficLayer.setMap(map);
+                document.getElementById('traffic-toggle').classList.add('active');
+
+                // Initialize Places services
+                try {
+                    debugLog.log('Initializing Places services...');
+                    autocompleteService = new google.maps.places.AutocompleteService();
+                    placesService = new google.maps.places.PlacesService(map);
+                    debugLog.log('Places services initialized');
+                } catch (error) {
+                    debugLog.error('Failed to initialize Places services', error);
+                    showError('Failed to initialize Places services. Make sure the Places API is enabled.');
+                }
+
+                // Set up destination input event listeners
+                const destinationInput = document.getElementById('destination-input');
+                destinationInput.addEventListener('input', debounce(handleDestinationInput, 500));
+                destinationInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        const suggestions = document.querySelectorAll('.suggestion-item');
+                        if (suggestions.length > 0) {
+                            suggestions[0].click();
+                        }
+                    }
+                });
+
+                // Set up navigation controls
+                document.getElementById('zoom-in').addEventListener('click', () => {
+                    map.setZoom(map.getZoom() + 1);
+                });
+
+                document.getElementById('zoom-out').addEventListener('click', () => {
+                    map.setZoom(map.getZoom() - 1);
+                });
+
+                document.getElementById('recenter').addEventListener('click', () => {
+                    if (currentPosition) {
+                        map.setCenter(currentPosition);
+                        map.setZoom(15);
+                    }
+                });
+
+                document.getElementById('traffic-toggle').addEventListener('click', toggleTraffic);
+
+                // Get user's location
+                debugLog.log('Getting user location...');
+                getCurrentLocation();
+            } catch (error) {
+                debugLog.error('Error initializing map', error);
+                showError('Failed to initialize map: ' + error.message);
+            }
+        }
+
+        function showLoading(message) {
+            // Create a loading element if it doesn't exist
+            let loadingEl = document.createElement('div');
+            loadingEl.className = 'loading-indicator';
+            loadingEl.innerHTML = `
+                <div class="spinner"><i class="fas fa-spinner fa-spin"></i></div>
+                <div class="message">${message || 'Loading...'}</div>
+            `;
+            document.body.appendChild(loadingEl);
+            
+            // Add the styles for the loading indicator if not already added
+            if (!document.getElementById('loading-styles')) {
+                const loadingStyle = document.createElement('style');
+                loadingStyle.id = 'loading-styles';
+                loadingStyle.textContent = `
+                    .loading-indicator {
+                        position: fixed;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        background: rgba(0, 0, 0, 0.8);
+                        color: white;
+                        padding: 20px;
+                        border-radius: 10px;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        gap: 10px;
+                        z-index: 2000;
+                    }
+                    .spinner {
+                        font-size: 24px;
+                    }
+                    .message {
+                        font-size: 16px;
+                    }
+                `;
+                document.head.appendChild(loadingStyle);
+            }
+            
+            // Store the loading element reference for later removal
+            window.currentLoader = loadingEl;
+            
+            // Set a timeout to automatically hide the loader after 30 seconds
+            setTimeout(hideLoading, 30000);
+        }
+
+        function hideLoading() {
+            if (window.currentLoader) {
+                window.currentLoader.remove();
+                window.currentLoader = null;
+            }
+        }
+
+        function handleDestinationInput() {
+            const input = document.getElementById('destination-input');
+            const container = document.getElementById('suggestions');
+            
+            debugLog.log('Handling destination input', input.value);
+
+            if (input.value.length < 3) {
+                container.style.display = 'none';
+                return;
+            }
+
+            try {
+                debugLog.log('Fetching place predictions...');
+                autocompleteService.getPlacePredictions({
+                    input: input.value,
+                    types: ['geocode', 'establishment'],
+                    componentRestrictions: { country: 'in' }
+                }, (predictions, status) => {
+                    debugLog.log('Place predictions status', status);
+                    
+                    if (status !== google.maps.places.PlacesServiceStatus.OK || !predictions) {
+                        debugLog.error('Predictions error', status);
+                        container.style.display = 'none';
+                        return;
+                    }
+
+                    debugLog.log('Received predictions', predictions.length);
+                    container.innerHTML = '';
+                    predictions.forEach(prediction => {
+                        const div = document.createElement('div');
+                        div.className = 'suggestion-item';
+                        div.textContent = prediction.description;
+                        div.onclick = () => selectDestination(prediction);
+                        container.appendChild(div);
+                    });
+                    container.style.display = 'block';
+                });
+            } catch (error) {
+                debugLog.error('Error in handleDestinationInput', error);
+                showError('Error searching for places: ' + error.message);
+            }
+        }
+
+        function selectDestination(prediction) {
+            debugLog.log('Selecting destination', prediction);
+            const input = document.getElementById('destination-input');
+            const container = document.getElementById('suggestions');
+            input.value = prediction.description;
+            container.style.display = 'none';
+
+            showLoading('Loading destination details...');
+
+            try {
+                placesService.getDetails({
+                    placeId: prediction.place_id,
+                    fields: ['geometry', 'formatted_address', 'name']
+                }, (place, status) => {
+                    debugLog.log('Place details status', status);
+                    
+                    if (status === google.maps.places.PlacesServiceStatus.OK && place && place.geometry) {
+                        debugLog.log('Place details received', place);
+                        destinationPlace = place.geometry.location;
+                        calculateRoute();
+                    } else {
+                        debugLog.error('Place details error', status);
+                        hideLoading();
+                        showError('Could not get place details. Error: ' + status);
+                    }
+                });
+            } catch (error) {
+                debugLog.error('Error in selectDestination', error);
+                hideLoading();
+                showError('Error getting place details: ' + error.message);
+            }
+        }
+
+        function calculateRoute() {
+            debugLog.log('Calculating route', { origin: currentPosition, destination: destinationPlace });
+            
+            if (!currentPosition || !destinationPlace) {
+                showError('Please select both origin and destination');
+                hideLoading();
+                return;
+            }
+
+            showLoading('Calculating route...');
+
+            try {
+                const request = {
+                    origin: currentPosition,
+                    destination: destinationPlace,
+                    travelMode: google.maps.TravelMode.DRIVING
+                };
+
+                // Add traffic model if browser supports it
+                try {
+                    request.drivingOptions = {
+                        departureTime: new Date(),
+                        trafficModel: google.maps.TrafficModel.BEST_GUESS
+                    };
+                } catch (e) {
+                    debugLog.log('Traffic model not supported', e);
+                }
+
+                debugLog.log('Sending route request', request);
+                
+                directionsService.route(request, (result, status) => {
+                    debugLog.log('Route calculation status', status);
+                    
+                    if (status === 'OK' && result.routes && result.routes.length > 0) {
+                        debugLog.log('Route calculated successfully');
+                        currentRoute = result;
+                        directionsRenderer.setDirections(result);
+                        displayRouteInfo(result);
+                        displayDirections(result);
+                        
+                        // Fit the map to show the entire route
+                        const bounds = new google.maps.LatLngBounds();
+                        bounds.extend(currentPosition);
+                        bounds.extend(destinationPlace);
+                        map.fitBounds(bounds);
+                        
+                        hideLoading();
+                        showSuccess('Route calculated successfully');
+                    } else {
+                        debugLog.error('Route calculation failed', status);
+                        hideLoading();
+                        showError('Could not calculate route: ' + status);
+                    }
+                });
+            } catch (error) {
+                debugLog.error('Error in calculateRoute', error);
+                hideLoading();
+                showError('Error calculating route: ' + error.message);
+            }
+        }
+
+        function getCurrentLocation() {
+            showLoading('Getting your location...');
+            
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        currentPosition = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        map.setCenter(currentPosition);
+                        map.setZoom(15);
+                        addUserMarker(currentPosition);
+                        hideLoading();
+                    },
+                    (error) => {
+                        console.error('Error getting location:', error);
+                        hideLoading();
+                        showError('Unable to get your location. Please enable location services.');
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    }
+                );
+            } else {
+                hideLoading();
+                showError('Geolocation is not supported by your browser.');
+            }
+        }
+
+        function addUserMarker(position) {
+            if (userMarker) {
+                userMarker.setMap(null);
+            }
+            
+            userMarker = new google.maps.Marker({
+                position: position,
+                map: map,
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 10,
+                    fillColor: '#4CAF50',
+                    fillOpacity: 1,
+                    strokeColor: '#ffffff',
+                    strokeWeight: 2
+                },
+                title: "Your location"
+            });
+        }
+
+        function startLocationUpdates() {
+            if (locationWatchId) {
+                navigator.geolocation.clearWatch(locationWatchId);
+            }
+
+            if (navigator.geolocation) {
+                locationWatchId = navigator.geolocation.watchPosition(
+                    (position) => {
+                        currentPosition = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        if (userMarker) {
+                            userMarker.setPosition(currentPosition);
+                        }
+                        updateNavigation();
+                    },
+                    (error) => {
+                        console.error('Error updating location:', error);
+                        showError('Location update failed. Please check your GPS signal.');
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 5000,
+                        maximumAge: 0
+                    }
+                );
+            }
+        }
+
+        function displayRouteInfo(route) {
+            const routeDetails = route.routes[0].legs[0];
+            document.getElementById('route-distance').textContent = routeDetails.distance.text;
+            document.getElementById('route-duration').textContent = routeDetails.duration.text;
+            
+            // Get traffic information with better error handling
+            const service = new google.maps.DistanceMatrixService();
+            const request = {
+                origins: [currentPosition],
+                destinations: [routeDetails.end_location],
+                travelMode: google.maps.TravelMode.DRIVING,
+                drivingOptions: {
+                    departureTime: new Date(),
+                    trafficModel: google.maps.TrafficModel.BEST_GUESS
+                }
+            };
+
+            service.getDistanceMatrix(request, (response, status) => {
+                if (status === 'OK' && response.rows[0] && response.rows[0].elements[0]) {
+                    const element = response.rows[0].elements[0];
+                    if (element.status === 'OK') {
+                        const durationInTraffic = element.duration_in_traffic;
+                        if (durationInTraffic) {
+                            const trafficRatio = durationInTraffic.value / routeDetails.duration.value;
+                            let trafficCondition;
+                            if (trafficRatio > 1.5) {
+                                trafficCondition = 'Heavy Traffic';
+                            } else if (trafficRatio > 1.2) {
+                                trafficCondition = 'Moderate Traffic';
+                            } else {
+                                trafficCondition = 'Light Traffic';
+                            }
+                            document.getElementById('route-traffic').textContent = trafficCondition;
+                        } else {
+                            document.getElementById('route-traffic').textContent = 'Traffic data unavailable';
+                        }
+                    } else {
+                        document.getElementById('route-traffic').textContent = 'Traffic data unavailable';
+                    }
+                } else {
+                    document.getElementById('route-traffic').textContent = 'Traffic data unavailable';
+                }
+            });
+        }
+
+        function displayDirections(route) {
+            const directionsList = document.getElementById('directions-list');
+            directionsList.innerHTML = '';
+
+            route.routes[0].legs[0].steps.forEach((step, index) => {
+                const div = document.createElement('div');
+                div.className = 'direction-step';
+                div.innerHTML = `
+                    <div class="step-number">${index + 1}</div>
+                    <div class="step-content">
+                        <div>${step.instructions}</div>
+                        <div class="step-distance">${step.distance.text}</div>
+                    </div>
+                `;
+                directionsList.appendChild(div);
+            });
+        }
+
+        function startNavigation() {
+            navigationActive = true;
+            currentStepIndex = 0;
+            updateActiveStep();
+            startLocationUpdates();
+        }
+
+        function updateActiveStep() {
+            const steps = document.querySelectorAll('.direction-step');
+            steps.forEach((step, index) => {
+                step.classList.toggle('active', index === currentStepIndex);
+            });
+        }
+
+        function updateNavigation() {
+            if (!navigationActive || !currentRoute) return;
+
+            const currentStep = currentRoute.routes[0].legs[0].steps[currentStepIndex];
+            const stepEnd = currentStep.end_location;
+            
+            // Calculate distance to step end
+            const distance = google.maps.geometry.spherical.computeDistanceBetween(
+                new google.maps.LatLng(currentPosition),
+                stepEnd
+            );
+
+            // If within 50 meters of step end, move to next step
+            if (distance < 50) {
+                currentStepIndex++;
+                if (currentStepIndex >= currentRoute.routes[0].legs[0].steps.length) {
+                    // Navigation complete
+                    navigationActive = false;
+                    if (locationWatchId) {
+                        navigator.geolocation.clearWatch(locationWatchId);
+                    }
+                    showSuccess('You have reached your destination!');
+                } else {
+                    updateActiveStep();
+                }
+            }
+        }
+
+        function toggleTraffic() {
+            const toggle = document.getElementById('traffic-toggle');
+            if (trafficLayer.getMap()) {
+                trafficLayer.setMap(null);
+                toggle.classList.remove('active');
+            } else {
+                trafficLayer.setMap(map);
+                toggle.classList.add('active');
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = message;
+            document.body.appendChild(errorDiv);
+            
+            setTimeout(() => {
+                errorDiv.remove();
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success-message';
+            successDiv.textContent = message;
+            document.body.appendChild(successDiv);
+            
+            setTimeout(() => {
+                successDiv.remove();
+            }, 5000);
+        }
+
+        // Add styles for error and success messages
+        const style = document.createElement('style');
+        style.textContent = `
+            .error-message, .success-message {
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                padding: 15px 30px;
+                border-radius: 25px;
+                color: white;
+                font-weight: bold;
+                z-index: 1000;
+                animation: slideDown 0.3s ease-out;
+            }
+            .error-message {
+                background: var(--error-color);
+            }
+            .success-message {
+                background: var(--success-color);
+            }
+            @keyframes slideDown {
+                from { transform: translate(-50%, -100%); }
+                to { transform: translate(-50%, 0); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Utility function for debouncing
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Apply saved wallpaper and theme
+        function applySavedWallpaperAndTheme() {
+            const savedWallpaperData = localStorage.getItem('veronicaAppWallpaperData');
+            if (savedWallpaperData) {
+                try {
+                    const { url, theme } = JSON.parse(savedWallpaperData);
+                    document.body.style.backgroundImage = `url('${url}')`;
+                    document.documentElement.style.setProperty('--primary-color', theme);
+                } catch (error) {
+                    console.error('Error applying saved wallpaper:', error);
+                    document.body.style.backgroundImage = "url('https://wallpaperaccess.com/full/2267772.jpg')";
+                }
+            } else {
+                document.body.style.backgroundImage = "url('https://wallpaperaccess.com/full/2267772.jpg')";
+            }
+        }
+
+        // Add a function to remove the development-only watermarks
+        function removeGoogleWatermark() {
+            const interval = setInterval(() => {
+                // Find and remove all watermark related elements
+                const elements = document.querySelectorAll('.gm-style a[rel="noopener"], .gm-style-cc, .gmnoprint, a[href*="maps.google.com/maps"]');
+                
+                if (elements.length > 0) {
+                    elements.forEach(el => {
+                        if (el.parentNode) {
+                            el.parentNode.removeChild(el);
+                        }
+                    });
+                    
+                    // Also try to find the message div with opacity
+                    const style = document.createElement('style');
+                    style.innerHTML = `
+                        .gm-style > div:first-child ~ div:nth-child(2) {
+                            display: none !important;
+                        }
+                        a[href="https://developers.google.com/maps/documentation/javascript/error-messages"] {
+                            display: none !important;
+                        }
+                        .gm-style {
+                            background-color: #242f3e !important;
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+            }, 1000);
+
+            // Stop checking after 10 seconds
+            setTimeout(() => {
+                clearInterval(interval);
+            }, 10000);
+        }
+
+        // Initialize when the page loads
+        window.addEventListener('load', () => {
+            applySavedWallpaperAndTheme();
+            removeGoogleWatermark();
+        });
+
+        // Reapply wallpaper and theme when the page becomes visible
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                applySavedWallpaperAndTheme();
+            }
+        });
+
+        class RouteOptimizer {
+            constructor() {
+                this.alternativeRoutes = [];
+                this.bestRoute = null;
+            }
+
+            async findBestRoute(origin, destination) {
+                try {
+                    const request = {
+                        origin: origin,
+                        destination: destination,
+                        travelMode: google.maps.TravelMode.DRIVING,
+                        provideRouteAlternatives: true,
+                        drivingOptions: {
+                            departureTime: new Date(),
+                            trafficModel: google.maps.TrafficModel.BEST_GUESS
+                        }
+                    };
+
+                    const response = await directionsService.route(request);
+                    
+                    if (response.routes && response.routes.length > 0) {
+                        this.alternativeRoutes = response.routes;
+                        this.bestRoute = this.selectBestRoute(response.routes);
+                        return this.bestRoute;
+                    }
+                    
+                    throw new Error('No routes found');
+                } catch (error) {
+                    console.error('Route optimization error:', error);
+                    throw error;
+                }
+            }
+
+            selectBestRoute(routes) {
+                return routes.reduce((best, current) => {
+                    const currentDuration = current.legs[0].duration_in_traffic.value;
+                    const bestDuration = best.legs[0].duration_in_traffic.value;
+                    return currentDuration < bestDuration ? current : best;
+                });
+            }
+
+            getAlternativeRoutes() {
+                return this.alternativeRoutes.filter(route => route !== this.bestRoute)
+                    .slice(0, NAV_CONFIG.maxAlternativeRoutes);
+            }
+        }
+
+        class TrafficMonitor {
+            constructor() {
+                this.trafficUpdates = [];
+                this.updateInterval = null;
+            }
+
+            startMonitoring(route) {
+                this.stopMonitoring();
+                this.updateInterval = setInterval(() => this.checkTraffic(route), NAV_CONFIG.trafficUpdateInterval);
+            }
+
+            stopMonitoring() {
+                if (this.updateInterval) {
+                    clearInterval(this.updateInterval);
+                    this.updateInterval = null;
+                }
+            }
+
+            async checkTraffic(route) {
+                try {
+                    const request = {
+                        origin: route.request.origin,
+                        destination: route.request.destination,
+                        travelMode: google.maps.TravelMode.DRIVING,
+                        drivingOptions: {
+                            departureTime: new Date(),
+                            trafficModel: google.maps.TrafficModel.BEST_GUESS
+                        }
+                    };
+
+                    const response = await directionsService.route(request);
+                    const newDuration = response.routes[0].legs[0].duration_in_traffic.value;
+                    const oldDuration = route.routes[0].legs[0].duration_in_traffic.value;
+                    
+                    if (newDuration > oldDuration * 1.2) { // 20% increase in duration
+                        this.trafficUpdates.push({
+                            timestamp: new Date(),
+                            oldDuration,
+                            newDuration,
+                            route: response.routes[0]
+                        });
+                        
+                        showTrafficAlert('Traffic conditions have worsened. Consider alternative routes.');
+                    }
+                } catch (error) {
+                    console.error('Traffic monitoring error:', error);
+                }
+            }
+        }
+
+        function showTrafficAlert(message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'traffic-alert';
+            alertDiv.innerHTML = `
+                <div class="alert-content">
+                    <i class="fas fa-traffic-light"></i>
+                    <span>${message}</span>
+                </div>
+                <button class="alert-close" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            document.body.appendChild(alertDiv);
+            setTimeout(() => alertDiv.remove(), 5000);
+        }
+
+        // Add traffic alert styles
+        const trafficStyle = document.createElement('style');
+        trafficStyle.textContent = `
+            .traffic-alert {
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #ff9800;
+                color: white;
+                padding: 15px;
+                border-radius: 5px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                min-width: 300px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                z-index: 1000;
+            }
+            .alert-content {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .alert-close {
+                background: none;
+                border: none;
+                color: white;
+                cursor: pointer;
+                padding: 5px;
+            }
+        `;
+        document.head.appendChild(trafficStyle);
+
+        // Enhanced route calculation
+        async function calculateRoute(destination) {
+            try {
+                if (!currentPosition) {
+                    throw new Error('Current location not available');
+                }
+
+                showLoading('Calculating best route...');
+
+                const bestRoute = await routeOptimizer.findBestRoute(currentPosition, destination);
+                directionsRenderer.setDirections({ routes: [bestRoute] });
+                
+                // Start traffic monitoring
+                trafficMonitor.startMonitoring({ routes: [bestRoute], request: { origin: currentPosition, destination } });
+                
+                // Display alternative routes
+                const alternatives = routeOptimizer.getAlternativeRoutes();
+                displayAlternativeRoutes(alternatives);
+                
+                hideLoading();
+                showSuccess('Route calculated successfully');
+            } catch (error) {
+                hideLoading();
+                showError('Failed to calculate route: ' + error.message);
+            }
+        }
+
+        function displayAlternativeRoutes(routes) {
+            const alternativesContainer = document.getElementById('alternative-routes');
+            alternativesContainer.innerHTML = '';
+            
+            routes.forEach((route, index) => {
+                const routeDiv = document.createElement('div');
+                routeDiv.className = 'alternative-route';
+                routeDiv.innerHTML = `
+                    <div class="route-info">
+                        <span>Alternative ${index + 1}</span>
+                        <span>${route.legs[0].duration_in_traffic.text}</span>
+                    </div>
+                    <button onclick="selectAlternativeRoute(${index})">Select</button>
+                `;
+                alternativesContainer.appendChild(routeDiv);
+            });
+        }
+
+        function selectAlternativeRoute(index) {
+            const route = routeOptimizer.alternativeRoutes[index];
+            directionsRenderer.setDirections({ routes: [route] });
+            showSuccess('Alternative route selected');
+        }
+
+        // Enhanced location tracking
+        function startLocationTracking() {
+            if (locationWatchId) {
+                navigator.geolocation.clearWatch(locationWatchId);
+            }
+
+            locationWatchId = navigator.geolocation.watchPosition(
+                (position) => {
+                    const location = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                        accuracy: position.coords.accuracy
+                    };
+
+                    updateUserLocation(location);
+                    checkRouteDeviation(location);
+                },
+                (error) => {
+                    showError('Location tracking error: ' + error.message);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        }
+
+        function checkRouteDeviation(location) {
+            if (!currentRoute) return;
+
+            const path = currentRoute.routes[0].overview_path;
+            const nearestPoint = findNearestPoint(location, path);
+            const distance = google.maps.geometry.spherical.computeDistanceBetween(
+                new google.maps.LatLng(location.lat, location.lng),
+                nearestPoint
+            );
+
+            if (distance > NAV_CONFIG.rerouteThreshold) {
+                showRouteDeviationAlert(distance);
+            }
+        }
+
+        function findNearestPoint(location, path) {
+            return path.reduce((nearest, point) => {
+                const distance = google.maps.geometry.spherical.computeDistanceBetween(
+                    new google.maps.LatLng(location.lat, location.lng),
+                    point
+                );
+                return distance < nearest.distance ? { point, distance } : nearest;
+            }, { point: path[0], distance: Infinity }).point;
+        }
+
+        function showRouteDeviationAlert(distance) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'deviation-alert';
+            alertDiv.innerHTML = `
+                <div class="alert-content">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>You have deviated from the route by ${Math.round(distance)} meters</span>
+                </div>
+                <button onclick="recalculateRoute()">Recalculate</button>
+            `;
+            document.body.appendChild(alertDiv);
+            setTimeout(() => alertDiv.remove(), 5000);
+        }
+
+        async function recalculateRoute() {
+            if (!currentRoute) return;
+            
+            try {
+                showLoading('Recalculating route...');
+                const destination = currentRoute.routes[0].legs[0].end_location;
+                await calculateRoute(destination);
+                hideLoading();
+            } catch (error) {
+                hideLoading();
+                showError('Failed to recalculate route: ' + error.message);
+            }
+        }
+
+        // Add deviation alert styles
+        const deviationStyle = document.createElement('style');
+        deviationStyle.textContent = `
+            .deviation-alert {
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #f44336;
+                color: white;
+                padding: 15px;
+                border-radius: 5px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                min-width: 300px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                z-index: 1000;
+            }
+            .deviation-alert button {
+                background: white;
+                color: #f44336;
+                border: none;
+                padding: 5px 15px;
+                border-radius: 3px;
+                cursor: pointer;
+                margin-left: 10px;
+            }
+        `;
+        document.head.appendChild(deviationStyle);
+    </script>
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCCHQ1neszJqcpGyyffg8XiS3pGt84LGUw&libraries=places,geometry,drawing&callback=initMap&v=weekly&region=IN&language=en">
+    </script>
+</body>
+</html> 
