@@ -1,18 +1,31 @@
 #Preview
-![Uploading image.png…]()
-![Uploading image.png…]()
-![Uploading image.png…]()
-![Uploading image.png…]()
-![Uploading image.png…]()
-![Uploading image.png…]()
-![Uploading image.png…]()
-![Uploading image.png…]()
-![Uploading image.png…]()
+ <img width="1905" height="1024" alt="image" src="https://github.com/user-attachments/assets/46d97312-7b41-48c1-bde7-7bdd52013b80" />
+<img width="1912" height="1031" alt="image" src="https://github.com/user-attachments/assets/a33a584d-2abd-4308-ba89-6df669ec4b41" /> 
+<img width="1919" height="997" alt="image" src="https://github.com/user-attachments/assets/cc29dcc4-7140-4a7b-a144-dd8b35768f3a" />
+<img width="1919" height="1019" alt="image" src="https://github.com/user-attachments/assets/ea344786-ece5-4a1b-99f0-c2ac84126149" />
+<img width="1919" height="1025" alt="image" src="https://github.com/user-attachments/assets/1c916e95-5b32-45fa-9a9b-fbc36dc0e13e" />
+<img width="1919" height="1018" alt="image" src="https://github.com/user-attachments/assets/bfdd2024-cd29-4d42-b179-5a3cf653c7e6" />
+<img width="1914" height="1023" alt="image" src="https://github.com/user-attachments/assets/5de8ad2e-32ce-46ed-b617-d1bf569c8ddc" />
+<img width="1913" height="1034" alt="image" src="https://github.com/user-attachments/assets/7cb5af6a-ba90-4ec9-96ea-3e18a346effd" />
 
 
 
 
+<img width="1919" height="1022" alt="image" src="https://github.com/user-attachments/assets/e6247878-b455-465e-aa12-6f9d0ea3f881" />
+<img width="1910" height="1029" alt="image" src="https://github.com/user-attachments/assets/6963fa5c-7795-460c-8d0b-0c6517309dbd" />
+<img width="1919" height="1022" alt="image" src="https://github.com/user-attachments/assets/2144fe12-fe5d-42e8-a5ec-2aa33ab76651" />
+<img width="1910" height="1029" alt="image" src="https://github.com/user-attachments/assets/7adf9b83-08c2-4d50-a854-f4817da13e5d" />
+<img width="1124" height="760" alt="image" src="https://github.com/user-attachments/assets/e9db5c6e-cc83-452a-8ccf-ee213bca0035" />
 
+
+<img width="1907" height="938" alt="image" src="https://github.com/user-attachments/assets/b425280b-4c49-437e-a722-287f9db7cb1d" />
+
+<img width="1919" height="1027" alt="image" src="https://github.com/user-attachments/assets/272f51c4-13cd-4039-b034-7beefc6968c4" />
+<img width="1919" height="1027" alt="image" src="https://github.com/user-attachments/assets/8dc2ac0b-4c07-42e3-ab4e-36a267161cf9" />
+<img width="1919" height="1029" alt="image" src="https://github.com/user-attachments/assets/6c7e420e-59d4-443e-bf54-7e58829b40a4" />
+
+
+<img width="1919" height="1029" alt="image" src="https://github.com/user-attachments/assets/e42f95c9-1d52-44ba-b58e-cefaf8e07ba4" />
 
 
 
@@ -149,3 +162,4 @@ The system uses the following criteria to detect potential accidents:
 - Monitoring changes within a 500ms window
 
 - Combined magnitude of X, Y, Z rotation 
+
