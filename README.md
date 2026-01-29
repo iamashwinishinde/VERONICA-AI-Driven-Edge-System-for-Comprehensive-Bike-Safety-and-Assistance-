@@ -1,3 +1,22 @@
+#Preview
+![Uploading image.png…]()
+![Uploading image.png…]()
+![Uploading image.png…]()
+![Uploading image.png…]()
+![Uploading image.png…]()
+![Uploading image.png…]()
+![Uploading image.png…]()
+![Uploading image.png…]()
+![Uploading image.png…]()
+
+
+
+
+
+
+
+
+
 # Real-time Accident Detection System
 
 This project implements a real-time accident detection system using ESP32 and MPU6050 gyroscope sensor. The system monitors bike movements and detects potential accidents based on sudden changes in angular velocity.
@@ -128,4 +147,5 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
 The system uses the following criteria to detect potential accidents:
 - Sudden spikes in angular velocity (above 250 degrees/second)
 - Monitoring changes within a 500ms window
+
 - Combined magnitude of X, Y, Z rotation 
