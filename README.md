@@ -1,3 +1,16 @@
+Live Demo : https://veronica-advanced-bike-assistant.netlify.app/veronica.html (use Chrome for better Voice Response)
+
+# Real-time Accident Detection System
+
+This project implements a real-time accident detection system using ESP32 and MPU6050 gyroscope sensor. The system monitors bike movements and detects potential accidents based on sudden changes in angular velocity.
+
+## Features
+
+- Real-time gyroscope data monitoring (X, Y, Z rotation)
+- WebSocket-based communication between ESP32 and web interface
+- Visual and audio alerts for potential accidents
+- Clean and modern UI with real-time updates
+
 #Preview
  <img width="1905" height="1024" alt="image" src="https://github.com/user-attachments/assets/46d97312-7b41-48c1-bde7-7bdd52013b80" />
 <img width="1912" height="1031" alt="image" src="https://github.com/user-attachments/assets/a33a584d-2abd-4308-ba89-6df669ec4b41" /> 
@@ -21,11 +34,10 @@
 <img width="1907" height="938" alt="image" src="https://github.com/user-attachments/assets/b425280b-4c49-437e-a722-287f9db7cb1d" />
 
 <img width="1919" height="1027" alt="image" src="https://github.com/user-attachments/assets/272f51c4-13cd-4039-b034-7beefc6968c4" />
-<img width="1919" height="1027" alt="image" src="https://github.com/user-attachments/assets/8dc2ac0b-4c07-42e3-ab4e-36a267161cf9" />
+
 <img width="1919" height="1029" alt="image" src="https://github.com/user-attachments/assets/6c7e420e-59d4-443e-bf54-7e58829b40a4" />
 
 
-<img width="1919" height="1029" alt="image" src="https://github.com/user-attachments/assets/e42f95c9-1d52-44ba-b58e-cefaf8e07ba4" />
 
 
 
@@ -162,4 +174,5 @@ The system uses the following criteria to detect potential accidents:
 - Monitoring changes within a 500ms window
 
 - Combined magnitude of X, Y, Z rotation 
+
 
